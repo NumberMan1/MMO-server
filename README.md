@@ -1,1 +1,1 @@
-MMO游戏服务器
+MMO游戏服务器(基于github.com/NumberMan1/common实现)
