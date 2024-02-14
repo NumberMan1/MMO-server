@@ -1,8 +1,7 @@
 package service
 
 import (
-	"github.com/NumberMan1/MMO-server/mgr"
-	"github.com/NumberMan1/MMO-server/model"
+	core2 "github.com/NumberMan1/MMO-server/model"
 	"github.com/NumberMan1/common/logger"
 	"github.com/NumberMan1/common/summer/network"
 	"github.com/NumberMan1/common/summer/network/core"
@@ -10,8 +9,10 @@ import (
 	"time"
 )
 
+// NetService 网络服务
 type NetService struct {
-	tcpServer      *core.TcpServer
+	tcpServer *core.TcpServer
+	//记录conn最后一次心跳包的时间
 	heartBeatPairs map[network.Connection]time.Time
 	heartTicker    *time.Ticker
 	cancel         chan struct{}
@@ -31,7 +32,9 @@ func NewNetService() *NetService {
 }
 
 func (n *NetService) Start() {
+	//启动网络监听，指定消息包装类型
 	n.tcpServer.Start()
+	//启动消息分发器
 	network.GetMessageRouterInstance().Start(4)
 	network.GetMessageRouterInstance().Subscribe("proto.HeartBeatRequest", network.MessageHandler{Op: n.heartBeatRequest})
 	go n.timerCallback()
@@ -47,6 +50,7 @@ func (n *NetService) Stop() {
 	n.cancel <- struct{}{}
 }
 
+// 收到心跳包
 func (n *NetService) heartBeatRequest(msg network.Msg) {
 	n.heartBeatPairs[msg.Sender] = time.Now()
 	p := &proto.HeartBeatResponse{}
@@ -60,6 +64,7 @@ func (n *NetService) timerCallback() {
 			now := time.Now()
 			for conn, tp := range n.heartBeatPairs {
 				cha := now.Sub(tp)
+				//关闭超时的客户端连接
 				if cha.Seconds() > (10 * time.Second).Seconds() {
 					conn.Close()
 					delete(n.heartBeatPairs, conn)
@@ -71,21 +76,22 @@ func (n *NetService) timerCallback() {
 	}
 }
 
+// 当客户端接入
 func (n *NetService) onClientConnected(conn network.Connection) {
 	logger.SLCInfo("客户端接入")
 	n.heartBeatPairs[conn] = time.Now()
+	conn.Set("Session", core2.NewSession())
 }
 
 func (n *NetService) onDisconnected(conn network.Connection) {
 	delete(n.heartBeatPairs, conn)
 	logger.SLCInfo("连接断开:%v", conn.Socket().RemoteAddr().String())
-	character := conn.Get("Character")
+	character := conn.Get("Session").(*core2.Session).Character
 	if character != nil {
-		space := character.(*model.Character).Space
+		space := character.Space()
 		if space != nil {
-			co := conn.Get("Character").(*model.Character)
-			space.CharacterLeave(conn, co)
-			mgr.GetCharacterManagerInstance().RemoveCharacter(character.(*model.Character).Id)
+			space.CharacterLeave(conn, character)
+			core2.GetCharacterManagerInstance().RemoveCharacter(character.Id())
 		}
 	}
 }

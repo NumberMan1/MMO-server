@@ -2,7 +2,7 @@ package service
 
 import (
 	"github.com/NumberMan1/MMO-server/database"
-	"github.com/NumberMan1/MMO-server/mgr"
+	"github.com/NumberMan1/MMO-server/model"
 	"github.com/NumberMan1/common/logger"
 	"github.com/NumberMan1/common/ns/singleton"
 	"github.com/NumberMan1/common/summer/network"
@@ -30,14 +30,36 @@ func GetUserServiceInstance() *UserService {
 func (us *UserService) Start() {
 	network.GetMessageRouterInstance().Subscribe("proto.GameEnterRequest", network.MessageHandler{Op: us.gameEnterRequest})
 	network.GetMessageRouterInstance().Subscribe("proto.UserLoginRequest", network.MessageHandler{Op: us.userLoginRequest})
+	network.GetMessageRouterInstance().Subscribe("proto.UserRegisterRequest", network.MessageHandler{Op: us.userRegisterRequest})
 	network.GetMessageRouterInstance().Subscribe("proto.CharacterDeleteRequest", network.MessageHandler{Op: us.characterDeleteRequest})
 	network.GetMessageRouterInstance().Subscribe("proto.CharacterListRequest", network.MessageHandler{Op: us.characterListRequest})
 	network.GetMessageRouterInstance().Subscribe("proto.CharacterCreateRequest", network.MessageHandler{Op: us.characterCreateRequest})
 }
 
+func (us *UserService) userRegisterRequest(msg network.Msg) {
+	message := msg.Message.(*proto.UserRegisterRequest)
+	var num int64
+	database.OrmDb.Where("username = ?", message.Username).Count(&num)
+	logger.SLCInfo("新用户注册:%s", message.Username)
+	resp := &proto.UserRegisterResponse{}
+	if num > 0 {
+		resp.Code = 1
+		resp.Message = "用户名已存在"
+	} else {
+		dbPlayer := database.DbPlayer{
+			Username: message.Username,
+			Password: message.Password,
+		}
+		database.OrmDb.Save(dbPlayer)
+		resp.Code = 6
+		resp.Message = "注册成功"
+	}
+	msg.Sender.Send(resp)
+}
+
 // 删除角色的请求
 func (us *UserService) characterDeleteRequest(msg network.Msg) {
-	player := msg.Sender.Get("DbPlayer").(*database.DbPlayer)
+	player := msg.Sender.Get("Session").(*model.Session).DbPlayer
 	database.OrmDb.Where("id = ?", msg.Message.(*proto.CharacterDeleteRequest).CharacterId).
 		Where("player_id = ?", player.ID).
 		Delete(&database.DbCharacter{})
@@ -51,7 +73,7 @@ func (us *UserService) characterDeleteRequest(msg network.Msg) {
 
 // 查询角色列表的请求
 func (us *UserService) characterListRequest(msg network.Msg) {
-	player := msg.Sender.Get("DbPlayer").(*database.DbPlayer)
+	player := msg.Sender.Get("Session").(*model.Session).DbPlayer
 	characters := make([]database.DbCharacter, 0)
 	//从数据库查询出当前玩家的全部角色
 	database.OrmDb.Where("player_id = ?", player.ID).Find(&characters)
@@ -60,15 +82,13 @@ func (us *UserService) characterListRequest(msg network.Msg) {
 		rsp.CharacterList = append(rsp.CharacterList, &proto.NCharacter{
 			Id: int32(character.ID),
 			//EntityId: character.EntityId,
-			TypeId:  int32(character.JobId),
+			Tid:     int32(character.JobId),
 			Name:    character.Name,
 			Level:   int32(character.Level),
 			Exp:     int64(character.Exp),
 			SpaceId: int32(character.SpaceId),
 			Gold:    character.Gold,
 			//Entity:   nil,
-			Hp: int32(character.Hp),
-			Mp: int32(character.Mp),
 		})
 	}
 	msg.Sender.Send(rsp)
@@ -89,9 +109,9 @@ func (us *UserService) characterCreateRequest(msg network.Msg) {
 		msg.Sender.Send(rsp)
 		return
 	}
-	characters := make([]database.DbCharacter, 0)
-	tx := database.OrmDb.Where("player_id = ?", player.(*database.DbPlayer).ID).Find(&characters)
-	if tx.RowsAffected >= 4 {
+	var num int64
+	database.OrmDb.Where("player_id = ?", player.(*database.DbPlayer).ID).Count(&num)
+	if num >= 4 {
 		// 角色数量最多4个
 		logger.SLCInfo("角色数量最多4个")
 		rsp.Message = "角色数量最多4个"
@@ -115,8 +135,8 @@ func (us *UserService) characterCreateRequest(msg network.Msg) {
 		return
 	}
 	//检验角色名是否存在
-	tx = database.OrmDb.Where("name = ?", msgTemp.Name).First(&database.DbCharacter{})
-	if tx.RowsAffected > 0 {
+	database.OrmDb.Where("name = ?", msgTemp.Name).Count(&num)
+	if num > 0 {
 		logger.SLCInfo("创建角色失败，角色名已存在")
 		rsp.Message = "创建角色失败，角色名已存在"
 		msg.Sender.Send(rsp)
@@ -127,7 +147,7 @@ func (us *UserService) characterCreateRequest(msg network.Msg) {
 	dbCharacter.JobId = int(msgTemp.JobType)
 	dbCharacter.SpaceId = 1
 	dbCharacter.PlayerId = int(player.(*database.DbPlayer).ID)
-	tx = database.OrmDb.Save(dbCharacter)
+	tx := database.OrmDb.Save(dbCharacter)
 	if tx.RowsAffected > 0 {
 		rsp.Success = true
 		rsp.Message = "角色创建成功"
@@ -148,7 +168,7 @@ func (us *UserService) userLoginRequest(msg network.Msg) {
 	if result.RowsAffected > 0 {
 		rsp.Success = true
 		rsp.Message = "登录成功"
-		msg.Sender.Set("DbPlayer", dbPlayer) //登录成功，在conn里记录用户信息
+		msg.Sender.Get("Session").(*model.Session).DbPlayer = dbPlayer //登录成功，在conn里记录用户信息
 	} else {
 		rsp.Success = false
 		rsp.Message = "用户名或密码错误"
@@ -159,17 +179,20 @@ func (us *UserService) userLoginRequest(msg network.Msg) {
 func (us *UserService) gameEnterRequest(msg network.Msg) {
 	rsq := msg.Message.(*proto.GameEnterRequest)
 	logger.SLCInfo("有玩家进入游戏,角色Id:%d", rsq.CharacterId)
-	player := msg.Sender.Get("DbPlayer").(*database.DbPlayer)
-	dbRole := database.DbCharacter{}
+	// 获取当前玩家
+	player := msg.Sender.Get("Session").(*model.Session).DbPlayer
+	// 查询数据库的角色
+	dbRole := &database.DbCharacter{}
 	database.OrmDb.Where("player_id = ?", player.ID).
-		Where("id = ?", rsq.CharacterId).First(&dbRole)
+		Where("id = ?", rsq.CharacterId).First(dbRole)
 	logger.SLCInfo("dbRole = %v", dbRole)
-	character := mgr.GetCharacterManagerInstance().CreateCharacter(dbRole)
+	// 把数据库角色变成游戏角色
+	character := model.GetCharacterManagerInstance().CreateCharacter(dbRole)
 	//通知玩家登录成功
 	response := &proto.GameEnterResponse{
 		Success:   true,
 		Entity:    character.EntityData(),
-		Character: character.Info,
+		Character: character.Info(),
 	}
 	msg.Sender.Send(response)
 	//将新角色加入到地图

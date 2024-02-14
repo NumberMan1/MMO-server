@@ -1,8 +1,8 @@
-package model
+package core
 
 import (
+	"github.com/NumberMan1/MMO-server/core/vector3"
 	"github.com/NumberMan1/common/summer/protocol/gen/proto"
-	"github.com/NumberMan1/common/summer/vector3"
 	"time"
 )
 
@@ -12,7 +12,7 @@ type Entity struct {
 	position   vector3.Vector3 //位置
 	direction  vector3.Vector3 //方向
 	netObj     *proto.NEntity  //网络对象
-	lastUpdate int64
+	lastUpdate int64           //最后一次更新位置的时间戳
 }
 
 // PositionTime 距离上次位置更新的间隔（秒）
@@ -76,4 +76,8 @@ func (e *Entity) SetEntityData(entity *proto.NEntity) {
 	e.SetPosition(vector3.NewVector3(float64(e.netObj.Position.X), float64(e.netObj.Position.Y), float64(e.netObj.Position.Z)))
 	e.SetDirection(vector3.NewVector3(float64(e.netObj.Direction.X), float64(e.netObj.Direction.Y), float64(e.netObj.Direction.Z)))
 	e.SetSpeed(int(e.netObj.Speed))
+}
+
+func (e *Entity) Update() {
+
 }

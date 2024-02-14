@@ -1,10 +1,10 @@
 package model
 
 import (
+	"github.com/NumberMan1/MMO-server/core/vector3"
 	"github.com/NumberMan1/MMO-server/database"
 	"github.com/NumberMan1/common/summer/network"
 	"github.com/NumberMan1/common/summer/protocol/gen/proto"
-	"github.com/NumberMan1/common/summer/vector3"
 )
 
 // Character 角色
@@ -13,34 +13,27 @@ type Character struct {
 	//当前角色的客户端连接
 	Conn network.Connection
 	//当前角色对应的数据库对象
-	Data database.DbCharacter
+	Data *database.DbCharacter
 }
 
-func NewCharacter(position, direction vector3.Vector3) *Character {
-	return &Character{Actor: NewActor(position, direction)}
-}
-
-func CharacterFromDbCharacter(character database.DbCharacter) *Character {
+func NewCharacter(dbCharacter *database.DbCharacter) *Character {
 	c := &Character{
-		Actor: NewActor(vector3.NewVector3(float64(character.X), float64(character.Y), float64(character.Z)), vector3.Zero3()),
-		Data:  character,
+		Actor: NewActor(proto.EntityType_Character, dbCharacter.JobId, dbCharacter.Level,
+			vector3.NewVector3(float64(dbCharacter.X), float64(dbCharacter.Y), float64(dbCharacter.Z)),
+			vector3.Zero3()),
 	}
-	c.Id = int(character.ID)
-	c.Name = character.Name
-	c.Info = &proto.NCharacter{
-		Id:       int32(character.ID),
-		TypeId:   int32(character.JobId),
-		EntityId: 0,
-		Name:     character.Name,
-		Level:    int32(character.Level),
-		Exp:      int64(character.Exp),
-		SpaceId:  int32(character.SpaceId),
-		Gold:     character.Gold,
-		Entity:   nil,
-		Hp:       int32(character.Hp),
-		Mp:       int32(character.Mp),
-	}
-	c.Data = character
-	c.SetSpeed(3000)
+	c.SetId(int(dbCharacter.ID))
+	c.SetName(dbCharacter.Name)
+	c.Info().Id = int32(dbCharacter.ID)
+	c.Info().Name = dbCharacter.Name
+	c.Info().Tid = int32(dbCharacter.JobId) //单位类型
+	c.Info().Level = int32(dbCharacter.Level)
+	c.Info().Exp = int64(dbCharacter.Exp)
+	c.Info().SpaceId = int32(dbCharacter.SpaceId)
+	c.Info().Gold = dbCharacter.Gold
+	c.Info().Hp = int32(dbCharacter.Hp)
+	c.Info().Mp = int32(dbCharacter.Mp)
+	c.Data = dbCharacter
+	c.Attr().Init(c.Define(), int(c.Info().Level))
 	return c
 }
