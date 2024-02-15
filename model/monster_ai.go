@@ -134,9 +134,8 @@ type MonsterAI struct {
 }
 
 func NewMonsterAI(owner *Monster) *MonsterAI {
-	param := &Param{
-		Owner: owner,
-	}
+	param := NewParam()
+	param.Owner = owner
 	a := &MonsterAI{AIBase: NewBase(owner), fsmSystem: fsm.NewSystem[*Param](param)}
 	a.fsmSystem.AddState("walk", NewWalkState())
 	a.fsmSystem.AddState("chase", NewChaseState())

@@ -16,7 +16,7 @@ type State[T any] struct {
 }
 
 func NewState[T any]() *State[T] {
-	return &State[T]{fsm: &System[T]{}}
+	return &State[T]{fsm: nil}
 }
 
 func (t *State[T]) Fsm() *System[T] {
