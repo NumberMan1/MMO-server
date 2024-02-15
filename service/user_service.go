@@ -101,7 +101,7 @@ func (us *UserService) characterCreateRequest(msg network.Msg) {
 		Success:   false,
 		Character: nil,
 	}
-	player := msg.Sender.Get("DbPlayer")
+	player := msg.Sender.Get("Session").(*model.Session).DbPlayer
 	if player == nil {
 		// 未登录不能创建角色
 		logger.SLCInfo("未登录不能创建角色")
@@ -110,7 +110,7 @@ func (us *UserService) characterCreateRequest(msg network.Msg) {
 		return
 	}
 	var num int64
-	database.OrmDb.Where("player_id = ?", player.(*database.DbPlayer).ID).Count(&num)
+	database.OrmDb.Where("player_id = ?", player.ID).Count(&num)
 	if num >= 4 {
 		// 角色数量最多4个
 		logger.SLCInfo("角色数量最多4个")
@@ -146,7 +146,7 @@ func (us *UserService) characterCreateRequest(msg network.Msg) {
 	dbCharacter.Name = msgTemp.Name
 	dbCharacter.JobId = int(msgTemp.JobType)
 	dbCharacter.SpaceId = 1
-	dbCharacter.PlayerId = int(player.(*database.DbPlayer).ID)
+	dbCharacter.PlayerId = int(player.ID)
 	tx := database.OrmDb.Save(dbCharacter)
 	if tx.RowsAffected > 0 {
 		rsp.Success = true
