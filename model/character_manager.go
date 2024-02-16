@@ -31,7 +31,7 @@ func GetCharacterManagerInstance() *CharacterManager {
 
 func (cm *CharacterManager) CreateCharacter(dbChr *database.DbCharacter) *Character {
 	character := NewCharacter(dbChr)
-	cm.characters.Store(character.Id, character)
+	cm.characters.Store(character.Id(), character)
 	GetEntityManagerInstance().AddEntity(dbChr.SpaceId, character)
 	return character
 }

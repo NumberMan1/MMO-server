@@ -5,6 +5,7 @@ import (
 	"github.com/NumberMan1/MMO-server/core/vector3"
 	"github.com/NumberMan1/MMO-server/model/core"
 	"github.com/NumberMan1/common/ns/singleton"
+	"slices"
 	"sync"
 )
 
@@ -51,7 +52,7 @@ func (em *EntityManager) RemoveEntity(spaceId int, entity core.IEntity) {
 	em.mutex.Lock()
 	delete(em.allEntities, entity.EntityId())
 	for e := em.spaceEntities[spaceId].Front(); e != nil; e = e.Next() {
-		if e.Value.(*core.Entity).EntityId() == entity.EntityId() {
+		if e.Value.(core.IEntity).EntityId() == entity.EntityId() {
 			em.spaceEntities[spaceId].Remove(e)
 			break
 		}
@@ -79,7 +80,7 @@ func GetEntityList[T core.IEntity](em *EntityManager, spaceId int, match func(T)
 	for e := em.spaceEntities[spaceId].Front(); e != nil; e = e.Next() {
 		if v, ok := e.Value.(T); ok {
 			if match(v) {
-				l.PushBack(e)
+				l.PushBack(e.Value)
 			}
 		}
 	}
@@ -105,7 +106,14 @@ func GetNearest[T core.IEntity](em *EntityManager, spaceId, r int, center vector
 		return vector3.GetDistance(center, v.Position()) <= float64(r)
 	})
 	if l.Len() > 0 {
-		return l.Front().Value.(T)
+		s := make([]T, 0)
+		for e := l.Front(); e != nil; e = e.Next() {
+			s = append(s, e.Value.(T))
+		}
+		slices.SortFunc(s, func(a, b T) int {
+			return int(vector3.GetDistance(center, a.Position()) - vector3.GetDistance(center, b.Position()))
+		})
+		return s[0]
 	} else {
 		var zero T
 		return zero
