@@ -107,7 +107,7 @@ func (m *Monster) LookRotation(fromDir vector3.Vector3) vector3.Vector3 {
 		eulerAngles.X = 360 - eulerAngles.X
 	}
 	//AngleY = arc tan(x/z)
-	eulerAngles.Y = math.Atan2(fromDir.Z, fromDir.X) * rad2Deg
+	eulerAngles.Y = math.Atan2(fromDir.X, fromDir.Z) * rad2Deg
 	if eulerAngles.Y < 0 {
 		eulerAngles.Y += 180
 	}

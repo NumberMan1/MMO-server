@@ -123,7 +123,7 @@ func (gbs *GoBackState) OnEnter() {
 
 func (gbs *GoBackState) OnUpdate() {
 	mon := gbs.P().Owner
-	if vector3.GetDistance(mon.InitPosition, mon.Position()) > 100 {
+	if vector3.GetDistance(mon.InitPosition, mon.Position()) < 100 {
 		gbs.Fsm().ChangeState("walk")
 	}
 }
