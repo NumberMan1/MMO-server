@@ -33,10 +33,15 @@ func NewMonster(tid, level int, position, direction vector3.Vector3) *Monster {
 	m.rand = rand.New(rand.NewSource(time.Now().Unix()))
 	// 位置同步
 	summer.GetScheduleInstance().AddTask(func() {
-		if m.State() == proto.EntityState_MOVE {
+		if m.State() != proto.EntityState_MOVE {
 			return
 		}
-	}, timeunit.Milliseconds, 1500, 0)
+		es := &proto.NEntitySync{
+			Entity: m.EntityData(),
+			State:  m.State(),
+		}
+		m.Space().UpdateEntity(es)
+	}, timeunit.Milliseconds, 150, 0)
 	//设置AI对象
 	switch m.Define().AI {
 	case "Monster":

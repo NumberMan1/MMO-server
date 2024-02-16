@@ -83,7 +83,19 @@ func (m *Vector3) LengthSq() float64 {
 
 // Normalize 三维向量：单位化
 func (m *Vector3) Normalize() {
-	m.Divide(m.Length())
+	// m.Divide(m.Length())
+	num := m.Length()
+	if num > 1e-05 {
+		m.Divide(num)
+		return
+	}
+	m.X = 0
+	m.Y = 0
+	m.Z = 0
+}
+
+func (m *Vector3) Magnitude() float64 {
+	return math.Sqrt(m.X*m.X + m.Y*m.Y + m.Z*m.Z)
 }
 
 // NewVector3 返回：新向量

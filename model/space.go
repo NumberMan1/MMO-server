@@ -89,6 +89,7 @@ func (s *Space) CharacterLeave(conn network.Connection, character *Character) {
 
 // UpdateEntity 广播更新Entity信息
 func (s *Space) UpdateEntity(sync *pt.NEntitySync) {
+	logger.SLCDebug("%v", sync)
 	for _, v := range s.characterDict {
 		if v.EntityId() == int(sync.Entity.Id) {
 			v.SetEntityData(sync.GetEntity())
