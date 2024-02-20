@@ -8,6 +8,8 @@ import (
 	"github.com/NumberMan1/common/logger"
 	mongobrocker "github.com/NumberMan1/common/mongo"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -25,13 +27,24 @@ func load[T any](filePath string) map[int]T {
 	}
 	return result
 }
-func save[T any](ctx context.Context, client *mongobrocker.Client, kv map[int]T) {
+func save[T define.IDefine](ctx context.Context, client *mongobrocker.Client, kv map[int]T) {
+	index := options.Index()
+	index.SetUnique(true)
+	index.SetName("id")
+	_, err := client.CreateIndex(ctx, "MMO", reflect.TypeOf(kv).String(), mongo.IndexModel{
+		Keys:    bson.D{{"id", 1}},
+		Options: index,
+	})
+	if err != nil {
+		panic(err)
+	}
 	for _, v := range kv {
 		//marshal, err := json.Marshal(v)
 		//if err != nil {
 		//	panic(err)
 		//}
-		_, err := client.InsertOne(ctx, "MMO", reflect.TypeOf(kv).String(), bson.D{{"base_info", v}})
+
+		_, err = client.InsertOne(ctx, "MMO", reflect.TypeOf(kv).String(), bson.D{{"id", v.GetId()}, {"base_info", v}})
 		//err = client.HSet(ctx, reflect.TypeOf(kv).String(), k, marshal).Err()
 		if err != nil {
 			panic(err)
