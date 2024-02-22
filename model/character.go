@@ -31,9 +31,13 @@ func NewCharacter(dbCharacter *database.DbCharacter) *Character {
 	c.Info().Exp = int64(dbCharacter.Exp)
 	c.Info().SpaceId = int32(dbCharacter.SpaceId)
 	c.Info().Gold = dbCharacter.Gold
-	c.Info().Hp = int32(dbCharacter.Hp)
-	c.Info().Mp = int32(dbCharacter.Mp)
+	c.Info().Hp = float32(dbCharacter.Hp)
+	c.Info().Mp = float32(dbCharacter.Mp)
 	c.Data = dbCharacter
-	c.Attr().Init(c.Define(), int(c.Info().Level))
 	return c
+}
+
+// CharacterId 玩家角色唯一ID
+func (c *Character) CharacterId() int {
+	return int(c.Data.ID)
 }

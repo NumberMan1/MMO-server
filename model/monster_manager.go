@@ -19,13 +19,13 @@ func (mm *MonsterManager) Init(space *Space) {
 	mm.space = space
 }
 
-func (mm *MonsterManager) Create(tid, level int, pos, dir vector3.Vector3) *Monster {
+func (mm *MonsterManager) Create(tid, level int, pos, dir *vector3.Vector3) *Monster {
 	monster := NewMonster(tid, level, pos, dir)
+	GetEntityManagerInstance().AddEntity(mm.space.Id, monster)
 	monster.Info().SpaceId = int32(mm.space.Id)
-	monster.Info().EntityId = int32(monster.EntityId())
+	monster.Info().GetEntity().Id = int32(monster.EntityId())
 	mm.dict[monster.EntityId()] = monster
 	monster.SetId(monster.EntityId())
 	mm.space.MonsterEnter(monster)
-	GetEntityManagerInstance().AddEntity(mm.space.Id, monster)
 	return monster
 }

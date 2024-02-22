@@ -55,12 +55,12 @@ func (ss *SpaceService) spaceEntitySyncRequest(msg network.Msg) {
 	//计算时间差
 	dt := min(serEntity.PositionTime(), 1.0)
 	//计算限额
-	limit := float64(serEntity.Speed()) * dt * 1.5
+	limit := float64(serEntity.Speed()) * dt * 3
 	logger.SLCInfo("距离%v，阈值%v，间隔%v", distance, limit, dt)
 	if math.IsNaN(distance) || distance > limit {
 		//拉回原位置
 		resp := &proto.SpaceEntitySyncResponse{
-			EntitySync: &proto.NEntitySync{
+			EntitySync: &proto.NetEntitySync{
 				Entity: serEntity.EntityData(),
 				Force:  true,
 			},

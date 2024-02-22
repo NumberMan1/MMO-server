@@ -22,6 +22,8 @@ type UnitDefine struct {
 	CRD       float32 `json:"CRD" bson:"crd"`              // 暴击伤害
 	HitRate   float32 `json:"HitRate" bson:"hit_rate"`     // 命中率
 	DodgeRate float32 `json:"DodgeRate" bson:"dodge_rate"` // 闪避率
+	HpRegen   float32 `json:"HpRegen" bson:"hp_regen"`     //生命恢复/秒
+	HpSteal   float32 `json:"HpSteal" bson:"hp_steal"`     // 伤害吸血%
 	STR       float32 `json:"STR" bson:"str"`              // 力量
 	INT       float32 `json:"INT" bson:"int"`              // 智力
 	AGI       float32 `json:"AGI" bson:"agi"`              // 敏捷

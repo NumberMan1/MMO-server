@@ -36,7 +36,6 @@ func (dm *DataManager) Init() {
 	loadFromMongo[*SkillDefine](ctx, dm.Skills, database.MongoDbClient, func() *SkillDefine {
 		return &SkillDefine{}
 	})
-
 }
 
 func loadFromMongo[T IDefine](ctx context.Context, kv map[int]T, client *mongobrocker.Client, constructor func() T) {

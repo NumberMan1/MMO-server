@@ -3,12 +3,10 @@ package model
 import (
 	"github.com/NumberMan1/MMO-server/core/fsm"
 	"github.com/NumberMan1/MMO-server/core/vector3"
-	"github.com/NumberMan1/common/logger"
 	"github.com/NumberMan1/common/summer/protocol/gen/proto"
 	"github.com/NumberMan1/common/summer/timeunit"
 	"math/rand"
 	"reflect"
-	"time"
 )
 
 type Param struct {
@@ -19,7 +17,7 @@ type Param struct {
 	WalkRange int
 	//追击范围
 	ChaseRange int
-	Rand       *rand.Rand
+	//Rand       *rand.Rand
 }
 
 func NewParam() *Param {
@@ -28,7 +26,7 @@ func NewParam() *Param {
 		ViewRange:  8000,
 		WalkRange:  8000,
 		ChaseRange: 12000,
-		Rand:       rand.New(rand.NewSource(time.Now().Unix())),
+		//Rand:       rand.New(rand.NewSource(time.Now().Unix())),
 	}
 }
 
@@ -64,7 +62,8 @@ func (ws *WalkState) OnUpdate() {
 	if mon.State() == proto.EntityState_IDLE {
 		if ws.lastTime+ws.waitTime < timeunit.Time {
 			ws.lastTime = timeunit.Time
-			ws.waitTime = (ws.P().Rand.Float64() * 20) + 10
+			//ws.waitTime = (ws.P().Rand.Float64() * 20) + 10
+			ws.waitTime = (rand.Float64() * 20) + 10
 			//移动到随机位置
 			target := mon.RandomPointWithBirth(float64(ws.P().WalkRange))
 			mon.MoveTo(target)
@@ -97,11 +96,12 @@ func (cs *ChaseState) OnUpdate() {
 		cs.Fsm().ChangeState("goback")
 		return
 	}
-	if n < 1200 {
+	if n < 1500 {
 		if mon.State() == proto.EntityState_MOVE {
 			mon.StopMove()
 		}
-		logger.SLCInfo("发起攻击")
+		//logger.SLCInfo("发起攻击")
+		mon.Attack(mon.Target)
 	} else {
 		mon.MoveTo(mon.Target.Position())
 	}

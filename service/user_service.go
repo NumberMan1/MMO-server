@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/NumberMan1/MMO-server/core/vector3"
 	"github.com/NumberMan1/MMO-server/database"
 	"github.com/NumberMan1/MMO-server/model"
 	"github.com/NumberMan1/common/logger"
@@ -34,6 +35,17 @@ func (us *UserService) Start() {
 	network.GetMessageRouterInstance().Subscribe("proto.CharacterDeleteRequest", network.MessageHandler{Op: us.characterDeleteRequest})
 	network.GetMessageRouterInstance().Subscribe("proto.CharacterListRequest", network.MessageHandler{Op: us.characterListRequest})
 	network.GetMessageRouterInstance().Subscribe("proto.CharacterCreateRequest", network.MessageHandler{Op: us.characterCreateRequest})
+	network.GetMessageRouterInstance().Subscribe("proto.ReviveRequest", network.MessageHandler{Op: us.reviveRequest})
+}
+
+func (us *UserService) reviveRequest(msg network.Msg) {
+	message := msg.Message.(*proto.ReviveRequest)
+	actor := model.GetUnit(int(message.GetEntityId()))
+	if chr, ok := actor.(*model.Character); ok && chr.IsDeath() && chr.Conn == msg.Sender {
+		sp := GetSpaceServiceInstance().GetSpace(1)
+		chr.TelportSpace(sp, vector3.Zero3(), vector3.Zero3(), chr)
+		chr.Revive()
+	}
 }
 
 func (us *UserService) userRegisterRequest(msg network.Msg) {
@@ -46,7 +58,7 @@ func (us *UserService) userRegisterRequest(msg network.Msg) {
 		resp.Code = 1
 		resp.Message = "用户名已存在"
 	} else {
-		dbPlayer := database.DbPlayer{
+		dbPlayer := &database.DbPlayer{
 			Username: message.Username,
 			Password: message.Password,
 		}
@@ -77,9 +89,9 @@ func (us *UserService) characterListRequest(msg network.Msg) {
 	characters := make([]database.DbCharacter, 0)
 	//从数据库查询出当前玩家的全部角色
 	database.OrmDb.Where("player_id = ?", player.ID).Find(&characters)
-	rsp := &proto.CharacterListResponse{CharacterList: make([]*proto.NCharacter, 0)}
+	rsp := &proto.CharacterListResponse{CharacterList: make([]*proto.NetActor, 0)}
 	for _, character := range characters {
-		rsp.CharacterList = append(rsp.CharacterList, &proto.NCharacter{
+		rsp.CharacterList = append(rsp.CharacterList, &proto.NetActor{
 			Id: int32(character.ID),
 			//EntityId: character.EntityId,
 			Tid:     int32(character.JobId),
@@ -188,6 +200,10 @@ func (us *UserService) gameEnterRequest(msg network.Msg) {
 	logger.SLCInfo("dbRole = %v", dbRole)
 	// 把数据库角色变成游戏角色
 	character := model.GetCharacterManagerInstance().CreateCharacter(dbRole)
+	//角色与conn关联
+	character.Conn = msg.Sender
+	//角色存入session
+	msg.Sender.Get("Session").(*model.Session).Character = character
 	//通知玩家登录成功
 	response := &proto.GameEnterResponse{
 		Success:   true,
@@ -197,5 +213,5 @@ func (us *UserService) gameEnterRequest(msg network.Msg) {
 	msg.Sender.Send(response)
 	//将新角色加入到地图
 	space := GetSpaceServiceInstance().GetSpace(dbRole.SpaceId) //新手村
-	space.CharacterJoin(msg.Sender, character)
+	space.CharacterJoin(character)
 }

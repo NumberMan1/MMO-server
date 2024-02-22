@@ -9,11 +9,11 @@ import (
 	"strconv"
 )
 
-func parsePoint(text string) vector3.Vector3 {
-	pattern := `\[(\d+),(\d+),(\d+)\]`
+func parsePoint(text string) *vector3.Vector3 {
+	pattern := `\d+`
 	compile := regexp.MustCompile(pattern)
-	match := compile.FindStringSubmatch(text)
-	if len(match) == 0 {
+	match := compile.FindAllString(text, -1)
+	if len(match) != 0 {
 		x, _ := strconv.ParseFloat(match[0], 64)
 		y, _ := strconv.ParseFloat(match[1], 64)
 		z, _ := strconv.ParseFloat(match[2], 64)
@@ -23,16 +23,16 @@ func parsePoint(text string) vector3.Vector3 {
 }
 
 type Spawner struct {
-	Define     define.SpawnDefine
+	Define     *define.SpawnDefine
 	Space      *Space
 	mon        *Monster
-	pos        vector3.Vector3 //刷怪位置
-	dir        vector3.Vector3 //刷怪方向
-	reviving   bool            //是否正在复活倒计时
-	reviveTime float64         //复活时间
+	pos        *vector3.Vector3 //刷怪位置
+	dir        *vector3.Vector3 //刷怪方向
+	reviving   bool             //是否正在复活倒计时
+	reviveTime float64          //复活时间
 }
 
-func NewSpawner(define define.SpawnDefine, space *Space) *Spawner {
+func NewSpawner(define *define.SpawnDefine, space *Space) *Spawner {
 	s := &Spawner{
 		Define: define,
 		Space:  space,
@@ -44,11 +44,11 @@ func NewSpawner(define define.SpawnDefine, space *Space) *Spawner {
 	return s
 }
 
-func (s *Spawner) Pos() vector3.Vector3 {
+func (s *Spawner) Pos() *vector3.Vector3 {
 	return s.pos
 }
 
-func (s *Spawner) Dir() vector3.Vector3 {
+func (s *Spawner) Dir() *vector3.Vector3 {
 	return s.dir
 }
 

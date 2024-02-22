@@ -7,7 +7,6 @@ import (
 	"github.com/NumberMan1/common/summer/timeunit"
 	"math"
 	"math/rand"
-	"time"
 )
 
 var (
@@ -17,26 +16,27 @@ var (
 type Monster struct {
 	*Actor
 	AI           IAIBase
-	Target       IActor          //目标
-	MoveTarget   vector3.Vector3 //移动目标位置
-	MovePosition vector3.Vector3 //当前移动位置
-	InitPosition vector3.Vector3 //出生点
-	rand         *rand.Rand
+	Target       IActor           //目标
+	MoveTarget   *vector3.Vector3 //移动目标位置
+	MovePosition *vector3.Vector3 //当前移动位置
+	InitPosition *vector3.Vector3 //出生点
+	//rand         *rand.Rand
 }
 
-func NewMonster(tid, level int, position, direction vector3.Vector3) *Monster {
+func NewMonster(tid, level int, position, direction *vector3.Vector3) *Monster {
 	m := &Monster{
 		Actor:        NewActor(proto.EntityType_Monster, tid, level, position, direction),
 		InitPosition: position,
 	}
 	m.SetState(proto.EntityState_IDLE)
-	m.rand = rand.New(rand.NewSource(time.Now().Unix()))
+	//m.rand = rand.New(rand.NewSource(time.Now().Unix()))
 	// 位置同步
 	summer.GetScheduleInstance().AddTask(func() {
-		if m.State() != proto.EntityState_MOVE {
+		if m.State() != proto.EntityState_MOVE || m.IsDeath() {
 			return
 		}
-		es := &proto.NEntitySync{
+		//广播消息
+		es := &proto.NetEntitySync{
 			Entity: m.EntityData(),
 			State:  m.State(),
 		}
@@ -50,7 +50,7 @@ func NewMonster(tid, level int, position, direction vector3.Vector3) *Monster {
 	return m
 }
 
-func (m *Monster) MoveTo(target vector3.Vector3) {
+func (m *Monster) MoveTo(target *vector3.Vector3) {
 	if m.State() == proto.EntityState_IDLE {
 		m.SetState(proto.EntityState_MOVE)
 	}
@@ -60,7 +60,7 @@ func (m *Monster) MoveTo(target vector3.Vector3) {
 		dir := vector3.Normalize3(vector3.Sub3(m.MoveTarget, m.MovePosition))
 		m.SetDirection(vector3.Dot(m.LookRotation(dir), y1000))
 		//广播消息
-		es := &proto.NEntitySync{
+		es := &proto.NetEntitySync{
 			Entity: m.EntityData(),
 			State:  m.State(),
 		}
@@ -72,7 +72,7 @@ func (m *Monster) StopMove() {
 	m.SetState(proto.EntityState_IDLE)
 	m.MovePosition = m.MoveTarget
 	//广播消息
-	es := &proto.NEntitySync{
+	es := &proto.NetEntitySync{
 		Entity: m.EntityData(),
 		State:  m.State(),
 	}
@@ -80,6 +80,10 @@ func (m *Monster) StopMove() {
 }
 
 func (m *Monster) Update() {
+	if m.IsDeath() {
+		return
+	}
+	m.Actor.Update()
 	if m.AI != nil {
 		m.AI.Update()
 	}
@@ -87,7 +91,7 @@ func (m *Monster) Update() {
 		//移动方向
 		dir := vector3.Normalize3(vector3.Sub3(m.MoveTarget, m.MovePosition))
 		m.SetDirection(vector3.Dot(m.LookRotation(dir), y1000))
-		dist := timeunit.Time
+		dist := float64(m.Speed()) * timeunit.DeltaTime
 		if vector3.GetDistance(m.MoveTarget, m.MovePosition) < dist {
 			m.StopMove()
 		} else {
@@ -99,7 +103,7 @@ func (m *Monster) Update() {
 }
 
 // LookRotation 方向向量转欧拉角
-func (m *Monster) LookRotation(fromDir vector3.Vector3) vector3.Vector3 {
+func (m *Monster) LookRotation(fromDir *vector3.Vector3) *vector3.Vector3 {
 	rad2Deg := 57.29578
 	eulerAngles := vector3.NewVector3(0, 0, 0)
 	eulerAngles.X = math.Acos(math.Sqrt((fromDir.X*fromDir.X+fromDir.Z*fromDir.Z)/(fromDir.X*fromDir.X+fromDir.Y*fromDir.Y+fromDir.Z*fromDir.Z))) * rad2Deg
@@ -120,11 +124,32 @@ func (m *Monster) LookRotation(fromDir vector3.Vector3) vector3.Vector3 {
 }
 
 // RandomPointWithBirth 计算出生点附近的随机坐标
-func (m *Monster) RandomPointWithBirth(r float64) vector3.Vector3 {
-	x := m.rand.Float64()*2 - 1
-	z := m.rand.Float64()*2 - 1
+func (m *Monster) RandomPointWithBirth(r float64) *vector3.Vector3 {
+	//x := m.rand.Float64()*2 - 1
+	//z := m.rand.Float64()*2 - 1
+	x := rand.Float64()*2 - 1
+	z := rand.Float64()*2 - 1
 	dir := vector3.Normalize3(vector3.NewVector3(x, 0, z))
 	dir.Multiply(r)
-	dir.Multiply(m.rand.Float64())
+	//dir.Multiply(m.rand.Float64())
+	dir.Multiply(rand.Float64())
 	return vector3.Add3(m.InitPosition, dir)
+}
+
+func (m *Monster) Attack(target IActor) {
+	var sk *Skill = nil
+	for e := m.skillMgr.Skills.Front(); e != nil; e = e.Next() {
+		if e.Value.(*Skill).IsNormal() {
+			sk = e.Value.(*Skill)
+			break
+		}
+	}
+	//eSkill := m.skillMgr.Skills.Front()
+	if sk == nil {
+		return
+	}
+	if sk.State != Stage_None {
+		return
+	}
+	m.Spell().SpellTarget(sk.Def.GetId(), target.Id())
 }

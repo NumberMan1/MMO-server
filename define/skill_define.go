@@ -16,7 +16,7 @@ type SkillDefine struct {
 	TargetType   string    `json:"TargetType" bson:"target_type"`     // 目标类型
 	CD           float32   `json:"CD" bson:"cd"`                      // 冷却时间
 	SpellRange   int       `json:"SpellRange" bson:"spell_range"`     // 施法距离
-	CastTime     float32   `json:"CastTime" bson:"cast_time"`         // 施法前摇
+	IntonateTime float32   `json:"IntonateTime" bson:"IntonateTime"`  // 施法前摇
 	Cost         int       `json:"Cost" bson:"cost"`                  // 魔法消耗
 	Anim1        string    `json:"Anim1" bson:"anim_1"`               //前摇动作
 	Anim2        string    `json:"AnimName" bson:"anim_2"`            // 激活动作
@@ -26,6 +26,8 @@ type SkillDefine struct {
 	MissileSpeed int       `json:"MissileSpeed" bson:"missile_speed"` // 投射速度
 	HitArt       string    `json:"HitArt" bson:"hit_art"`             // 击中效果
 	Area         int       `json:"Area" bson:"area"`                  // 影响区域
+	Duration     float32   `json:"Duration" bson:"duration"`          //持续时间
+	Interval     float32   `json:"Interval" bson:"interval"`          //伤害间隔
 	HitDelay     []float32 `json:"HitDelay" bson:"hit_delay"`         // 命中时间
 	BUFF         []int     `json:"BUFF" bson:"buff"`                  // 附加效果
 	AD           float32   `json:"AD" bson:"ad"`                      // 物理攻击
