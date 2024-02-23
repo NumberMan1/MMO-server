@@ -71,7 +71,7 @@ func (s *Skill) IsNoneTarget() bool {
 }
 
 func (s *Skill) IsNormal() bool {
-	return s.Def.TargetType == "普通攻击"
+	return s.Def.Type == "普通攻击"
 }
 
 func (s *Skill) FightMgr() *FightMgr {

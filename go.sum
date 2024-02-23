@@ -683,10 +683,7 @@ github.com/Microsoft/hcsshim/test v0.0.0-20201218223536-d3e5debf77da/go.mod h1:5
 github.com/Microsoft/hcsshim/test v0.0.0-20210227013316-43a75bb4edd3/go.mod h1:mw7qgWloBUl75W/gVH3cQszUg1+gUITj7D6NY7ywVnY=
 github.com/NYTimes/gziphandler v0.0.0-20170623195520-56545f4a5d46/go.mod h1:3wb06e3pkSAbeQ52E9H9iFoQsEEwGN64994WTCIhntQ=
 github.com/NYTimes/gziphandler v1.1.1/go.mod h1:n/CVRwUEOgIxrgPvAQhUUr9oeUtvrhMomdKFjzJNB0c=
-github.com/NumberMan1/common v1.0.13 h1:ufBQ2hGaUvcruFCj4ZIXaRbOpowJRae5A31dN/9+5Zc=
-github.com/NumberMan1/common v1.0.13/go.mod h1:whK6V4kshfLEIZyuVhqBGrTIE4AjdFYPJpOoKFSsoag=
-github.com/NumberMan1/common v1.0.14 h1:77J8QfQtahRVJvRGld+3WH9T0N4jU6hCvdooDRJf/YQ=
-github.com/NumberMan1/common v1.0.14/go.mod h1:whK6V4kshfLEIZyuVhqBGrTIE4AjdFYPJpOoKFSsoag=
+github.com/NumberMan1/common v1.0.15 h1:UuJsk8Ax2T2Nhuoq2V/1ubCulMeU3N3b8QbYs4k3zBQ=
 github.com/NumberMan1/common v1.0.15/go.mod h1:whK6V4kshfLEIZyuVhqBGrTIE4AjdFYPJpOoKFSsoag=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/OneOfOne/xxhash v1.2.8/go.mod h1:eZbhyaAYD41SGSSsnmcpxVoRiQ/MPUTjUdIIOT9Um7Q=

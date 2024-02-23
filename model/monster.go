@@ -151,5 +151,5 @@ func (m *Monster) Attack(target IActor) {
 	if sk.State != Stage_None {
 		return
 	}
-	m.Spell().SpellTarget(sk.Def.GetId(), target.Id())
+	m.Spell().SpellTarget(sk.Def.GetId(), target.EntityId())
 }

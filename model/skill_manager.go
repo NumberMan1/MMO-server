@@ -33,6 +33,10 @@ func (sm *SkillManager) InitSkills() {
 			s = append(s, v.ID)
 		}
 	}
+	// 加载野怪通用技能
+	if job == 1002 || job == 1003 {
+		s = append(s, 101)
+	}
 	sm.loadSkill(s)
 }
 
