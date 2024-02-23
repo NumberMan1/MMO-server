@@ -33,6 +33,12 @@ func (sm *SkillManager) InitSkills() {
 			s = append(s, v.ID)
 		}
 	}
+	// 移除自定义技能,暂未实现
+	for i, v := range s {
+		if v == 2003 {
+			s = append(s[:i], s[i+1:]...)
+		}
+	}
 	// 加载野怪通用技能
 	if job == 1002 || job == 1003 {
 		s = append(s, 101)

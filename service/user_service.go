@@ -154,10 +154,15 @@ func (us *UserService) characterCreateRequest(msg network.Msg) {
 		msg.Sender.Send(rsp)
 		return
 	}
+	//出生点坐标|
+	birthPos := vector3.NewVector3(354947, 1660, 308498)
 	dbCharacter := database.NewDbCharacter()
 	dbCharacter.Name = msgTemp.Name
 	dbCharacter.JobId = int(msgTemp.JobType)
-	dbCharacter.SpaceId = 1
+	dbCharacter.SpaceId = 2
+	dbCharacter.X = int(birthPos.X)
+	dbCharacter.Y = int(birthPos.Y)
+	dbCharacter.Z = int(birthPos.Z)
 	dbCharacter.PlayerId = int(player.ID)
 	tx := database.OrmDb.Save(dbCharacter)
 	if tx.RowsAffected > 0 {
@@ -204,13 +209,13 @@ func (us *UserService) gameEnterRequest(msg network.Msg) {
 	character.Conn = msg.Sender
 	//角色存入session
 	msg.Sender.Get("Session").(*model.Session).Character = character
-	//通知玩家登录成功
-	response := &proto.GameEnterResponse{
-		Success:   true,
-		Entity:    character.EntityData(),
-		Character: character.Info(),
-	}
-	msg.Sender.Send(response)
+	////通知玩家登录成功
+	//response := &proto.GameEnterResponse{
+	//	Success:   true,
+	//	Entity:    character.EntityData(),
+	//	Character: character.Info(),
+	//}
+	//msg.Sender.Send(response)
 	//将新角色加入到地图
 	space := GetSpaceServiceInstance().GetSpace(dbRole.SpaceId) //新手村
 	space.CharacterJoin(character)

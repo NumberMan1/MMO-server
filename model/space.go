@@ -76,6 +76,7 @@ func (s *Space) CharacterJoin(character *Character) {
 	for _, v := range s.monsterDict {
 		ser.List = append(ser.List, v.Info())
 	}
+	//logger.SLCInfo("ser.List %v", ser.List)
 	character.Conn.Send(ser)
 }
 
