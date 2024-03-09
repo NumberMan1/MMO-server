@@ -18,6 +18,7 @@ type DataManager struct {
 	Units  map[int]*UnitDefine
 	Spawns map[int]*SpawnDefine
 	Skills map[int]*SkillDefine
+	Items  map[int]*ItemDefine
 }
 
 // Init 从mongodb中读取地图,单位,刷怪,技能信息
@@ -35,6 +36,9 @@ func (dm *DataManager) Init() {
 	})
 	loadFromMongo[*SkillDefine](ctx, dm.Skills, database.MongoDbClient, func() *SkillDefine {
 		return &SkillDefine{}
+	})
+	loadFromMongo[*ItemDefine](ctx, dm.Items, database.MongoDbClient, func() *ItemDefine {
+		return &ItemDefine{}
 	})
 }
 
@@ -63,6 +67,7 @@ func GetDataManagerInstance() *DataManager {
 			Units:  map[int]*UnitDefine{},
 			Spawns: map[int]*SpawnDefine{},
 			Skills: map[int]*SkillDefine{},
+			Items:  map[int]*ItemDefine{},
 		}, nil
 	})
 	return result

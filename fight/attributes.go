@@ -20,7 +20,7 @@ type Attributes struct {
 }
 
 // Add 增加属性
-func (ad *Attributes) Add(data Attributes) {
+func (ad *Attributes) Add(data *Attributes) {
 	ad.Speed += data.Speed
 	ad.HPMax += data.HPMax
 	ad.MPMax += data.MPMax
@@ -40,7 +40,7 @@ func (ad *Attributes) Add(data Attributes) {
 }
 
 // Sub 减少属性
-func (ad *Attributes) Sub(data Attributes) {
+func (ad *Attributes) Sub(data *Attributes) {
 	ad.Speed -= data.Speed
 	ad.HPMax -= data.HPMax
 	ad.MPMax -= data.MPMax

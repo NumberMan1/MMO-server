@@ -5,6 +5,7 @@ import (
 	"github.com/NumberMan1/common/ns/singleton"
 	"github.com/NumberMan1/common/summer"
 	"github.com/NumberMan1/common/summer/timeunit"
+	"google.golang.org/protobuf/proto"
 	"sync"
 )
 
@@ -18,14 +19,18 @@ type CharacterManager struct {
 	characters *sync.Map
 }
 
+func init() {
+	result := GetCharacterManagerInstance()
+	//每隔5秒保存Data到数据库
+	summer.GetScheduleInstance().AddTask(result.save, timeunit.Seconds, 5, 0)
+}
+
 func GetCharacterManagerInstance() *CharacterManager {
 	result, _ := singleton.GetOrDo[*CharacterManager](&singleCharacterManager, func() (*CharacterManager, error) {
 		return &CharacterManager{
 			characters: &sync.Map{},
 		}, nil
 	})
-	//每隔5秒保存Data到数据库
-	summer.GetScheduleInstance().AddTask(result.save, timeunit.Seconds, 5, 0)
 	return result
 }
 
@@ -64,6 +69,15 @@ func (cm *CharacterManager) save() {
 		chr.Data.X = int(chr.Position().X)
 		chr.Data.Y = int(chr.Position().Y)
 		chr.Data.Z = int(chr.Position().Z)
+		chr.Data.JobId = int(chr.Info().Tid)
+		chr.Data.Hp = int(chr.Info().Hp)
+		chr.Data.Mp = int(chr.Info().Mp)
+		chr.Data.Level = int(chr.Info().Level)
+		chr.Data.Exp = int(chr.Info().Exp)
+		chr.Data.SpaceId = int(chr.Info().SpaceId)
+		chr.Data.Gold = chr.Info().Gold
+		bs, _ := proto.Marshal(chr.Knapsack.InventoryInfo())
+		chr.Data.Knapsack = bs
 		database.OrmDb.Save(chr.Data)
 		return true
 	})

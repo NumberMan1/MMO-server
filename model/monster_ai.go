@@ -6,7 +6,6 @@ import (
 	"github.com/NumberMan1/common/summer/protocol/gen/proto"
 	"github.com/NumberMan1/common/summer/timeunit"
 	"math/rand"
-	"reflect"
 )
 
 type Param struct {
@@ -53,8 +52,15 @@ func (ws *WalkState) OnEnter() {
 func (ws *WalkState) OnUpdate() {
 	mon := ws.P().Owner
 	//查询 8000 范围内的玩家
-	chr := GetNearest[*Character](GetEntityManagerInstance(), mon.Space().Id, ws.P().ViewRange, mon.Position())
-	if !reflect.ValueOf(chr).IsZero() {
+	chrs := GetRangeEntityOrder[*Character](GetEntityManagerInstance(), mon.Space().Id, ws.P().ViewRange, mon.Position())
+	if chrs != nil {
+		var chr *Character
+		for i := 0; i < len(chrs); i++ {
+			if !chrs[i].IsDeath() {
+				chr = chrs[i]
+				break
+			}
+		}
 		mon.Target = chr
 		ws.Fsm().ChangeState("chase")
 		return

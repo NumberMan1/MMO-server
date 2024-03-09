@@ -90,7 +90,7 @@ func (n *NetService) onDisconnected(conn network.Connection) {
 	if character != nil {
 		space := character.Space()
 		if space != nil {
-			space.CharacterLeave(character)
+			space.EntityLeave(character)
 			core2.GetCharacterManagerInstance().RemoveCharacter(character.Id())
 		}
 	}

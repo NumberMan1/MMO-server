@@ -27,6 +27,7 @@ type DbCharacter struct {
 	Z        int
 	Gold     int64
 	PlayerId int
+	Knapsack []byte
 }
 
 func NewDbCharacter() *DbCharacter {

@@ -3,6 +3,7 @@ package model
 import (
 	"github.com/NumberMan1/MMO-server/core/vector3"
 	"github.com/NumberMan1/MMO-server/database"
+	"github.com/NumberMan1/MMO-server/inventory/item"
 	"github.com/NumberMan1/common/summer/network"
 	"github.com/NumberMan1/common/summer/protocol/gen/proto"
 )
@@ -14,6 +15,8 @@ type Character struct {
 	Conn network.Connection
 	//当前角色对应的数据库对象
 	Data *database.DbCharacter
+	//背包
+	Knapsack *Inventory
 }
 
 func NewCharacter(dbCharacter *database.DbCharacter) *Character {
@@ -34,10 +37,53 @@ func NewCharacter(dbCharacter *database.DbCharacter) *Character {
 	c.Info().Hp = float32(dbCharacter.Hp)
 	c.Info().Mp = float32(dbCharacter.Mp)
 	c.Data = dbCharacter
+	c.Knapsack = NewInventory(c)
+	c.Knapsack.Init(c.Data.Knapsack)
 	return c
 }
 
 // CharacterId 玩家角色唯一ID
 func (c *Character) CharacterId() int {
 	return int(c.Data.ID)
+}
+
+// UseItem 使用物品
+func (c *Character) UseItem(slotIndex int) {
+	item1, ok := c.Knapsack.TrySlotItem(slotIndex)
+	if !ok {
+		return
+	}
+	if item1.ItemType() != item.ItemType_Consumable {
+		return
+	}
+	item1.Amount -= 1
+	if item1.Amount <= 0 {
+		c.Knapsack.SetItem(slotIndex, nil)
+	}
+	//发送消息
+	c.SendInventory(true, false, false)
+	//物品效果
+	if item1.Id() == 1001 {
+		c.SetAndUpdateHp(c.Hp() + 50)
+	}
+	if item1.Id() == 1002 {
+		c.SetAndUpdateMp(c.Mp() + 50)
+	}
+}
+
+// SendInventory 发送背包到客户端
+func (c *Character) SendInventory(isKnapsack, isStorage, isEquips bool) {
+	rsp := &proto.InventoryResponse{
+		EntityId: int32(c.EntityId()),
+	}
+	if isKnapsack {
+		rsp.KnapsackInfo = c.Knapsack.InventoryInfo()
+	}
+	if isStorage {
+
+	}
+	if isEquips {
+
+	}
+	c.Conn.Send(rsp)
 }

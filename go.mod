@@ -3,7 +3,7 @@ module github.com/NumberMan1/MMO-server
 go 1.21.1
 
 require (
-	github.com/NumberMan1/common v1.0.15
+	github.com/NumberMan1/common v1.0.17
 	go.mongodb.org/mongo-driver v1.13.0
 	google.golang.org/protobuf v1.31.0
 	gorm.io/gorm v1.25.7
