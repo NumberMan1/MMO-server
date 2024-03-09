@@ -6,15 +6,23 @@ import (
 	"github.com/NumberMan1/common/logger"
 )
 
+// Missile 投射物
 type Missile struct {
-	skill    *Skill
-	target   fight.ISCObject
-	initPos  *vector3.Vector3
+	//投射物所在场景
+	space *Space
+	//所属技能
+	skill *Skill
+	//追击目标
+	target fight.ISCObject
+	//初始位置
+	initPos *vector3.Vector3
+	//飞弹当前位置
 	Position *vector3.Vector3
 }
 
 func NewMissile(skill *Skill, initPos *vector3.Vector3, target fight.ISCObject) *Missile {
 	m := &Missile{
+		space:    skill.Owner.Space(),
 		skill:    skill,
 		target:   target,
 		initPos:  initPos,
@@ -25,7 +33,7 @@ func NewMissile(skill *Skill, initPos *vector3.Vector3, target fight.ISCObject) 
 }
 
 func (m *Missile) FightMgr() *FightMgr {
-	return m.skill.FightMgr()
+	return m.space.FightMgr
 }
 
 func (m *Missile) OnUpdate(dt float64) {

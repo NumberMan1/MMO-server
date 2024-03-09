@@ -48,8 +48,9 @@ func (em *EntityManager) AddEntity(spaceId int, entity entity.IEntity) {
 	if !ok {
 		em.spaceEntities.Store(spaceId, list.New())
 	}
-	value, _ := em.spaceEntities.Load(spaceId)
-	value.(*list.List).PushBack(entity)
+	em.forUnits(spaceId, func(entities *list.List) {
+		entities.PushBack(entity)
+	})
 	em.mutex.Unlock()
 }
 
@@ -66,7 +67,7 @@ func (em *EntityManager) RemoveEntity(spaceId int, ie entity.IEntity) {
 	em.allEntities.Delete(ie.EntityId())
 	em.forUnits(spaceId, func(entities *list.List) {
 		for e := entities.Front(); e != nil; e = e.Next() {
-			if e.Value.(entity.IEntity).EntityId() == ie.EntityId() {
+			if e.Value.(entity.IEntity) == ie {
 				entities.Remove(e)
 				break
 			}
@@ -82,7 +83,7 @@ func (em *EntityManager) ChangeSpace(ie entity.IEntity, oldSpaceId, newSpaceId i
 	}
 	em.forUnits(oldSpaceId, func(entities *list.List) {
 		for e := entities.Front(); e != nil; e = e.Next() {
-			if e.Value.(entity.IEntity).EntityId() == ie.EntityId() {
+			if e.Value.(entity.IEntity) == ie {
 				entities.Remove(e)
 				break
 			}
@@ -121,8 +122,8 @@ func GetEntityList[T entity.IEntity](em *EntityManager, spaceId int, match func(
 	return l
 }
 
-// GetNearest 查找最近的对象
-func GetNearest[T entity.IEntity](em *EntityManager, spaceId, r int, center *vector3.Vector3) T {
+// GetRangeEntityOrder 查找范围内的T类型对象,并按照距离排序
+func GetRangeEntityOrder[T entity.IEntity](em *EntityManager, spaceId, r int, center *vector3.Vector3) []T {
 	l := GetEntityList[T](em, spaceId, func(v T) bool {
 		return vector3.GetDistance(center, v.Position()) <= float64(r)
 	})
@@ -134,10 +135,11 @@ func GetNearest[T entity.IEntity](em *EntityManager, spaceId, r int, center *vec
 		slices.SortFunc(s, func(a, b T) int {
 			return int(vector3.GetDistance(center, a.Position()) - vector3.GetDistance(center, b.Position()))
 		})
-		return s[0]
+		return s
 	} else {
-		var zero T
-		return zero
+		//var zero T
+		//return zero
+		return nil
 	}
 }
 

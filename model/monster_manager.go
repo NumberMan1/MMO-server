@@ -26,6 +26,6 @@ func (mm *MonsterManager) Create(tid, level int, pos, dir *vector3.Vector3) *Mon
 	monster.Info().GetEntity().Id = int32(monster.EntityId())
 	mm.dict[monster.EntityId()] = monster
 	monster.SetId(monster.EntityId())
-	mm.space.MonsterEnter(monster)
+	mm.space.EntityEnter(monster)
 	return monster
 }

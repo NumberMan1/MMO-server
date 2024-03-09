@@ -61,6 +61,7 @@ func main() {
 	units := load[*define.UnitDefine](filepath.Dir(executable) + "/out/UnitDefine.json")
 	spawns := load[*define.SpawnDefine](filepath.Dir(executable) + "/out/SpawnDefine.json")
 	skills := load[*define.SkillDefine](filepath.Dir(executable) + "/out/SkillDefine.json")
+	items := load[*define.ItemDefine](filepath.Dir(executable) + "/out/ItemDefine.json")
 	ctx := context.Background()
 	client := &mongobrocker.Client{
 		BaseComponent: common.NewBaseComponent(),
@@ -76,4 +77,11 @@ func main() {
 	save[*define.UnitDefine](ctx, client, units)
 	save[*define.SpawnDefine](ctx, client, spawns)
 	save[*define.SkillDefine](ctx, client, skills)
+	save[*define.ItemDefine](ctx, client, items)
+	define.GetDataManagerInstance().Init()
+	logger.SLCInfo("Spaces:%v", define.GetDataManagerInstance().Spaces)
+	logger.SLCInfo("Units:%v", define.GetDataManagerInstance().Units)
+	logger.SLCInfo("Items:%v", define.GetDataManagerInstance().Items)
+	logger.SLCInfo("Spawns:%v", define.GetDataManagerInstance().Spawns)
+	logger.SLCInfo("Skills:%v", define.GetDataManagerInstance().Skills)
 }

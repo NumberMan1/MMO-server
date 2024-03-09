@@ -8,6 +8,7 @@ import (
 	"github.com/NumberMan1/common/ns/singleton"
 	"github.com/NumberMan1/common/summer/network"
 	"github.com/NumberMan1/common/summer/protocol/gen/proto"
+	"slices"
 	"strings"
 	"unicode/utf8"
 )
@@ -36,6 +37,93 @@ func (us *UserService) Start() {
 	network.GetMessageRouterInstance().Subscribe("proto.CharacterListRequest", network.MessageHandler{Op: us.characterListRequest})
 	network.GetMessageRouterInstance().Subscribe("proto.CharacterCreateRequest", network.MessageHandler{Op: us.characterCreateRequest})
 	network.GetMessageRouterInstance().Subscribe("proto.ReviveRequest", network.MessageHandler{Op: us.reviveRequest})
+	network.GetMessageRouterInstance().Subscribe("proto.PickupItemRequest", network.MessageHandler{Op: us.pickupItemRequest})
+	network.GetMessageRouterInstance().Subscribe("proto.InventoryRequest", network.MessageHandler{Op: us.inventoryRequest})
+	//物品放置请求
+	network.GetMessageRouterInstance().Subscribe("proto.ItemPlacementRequest", network.MessageHandler{Op: us.itemPlacementRequest})
+	//使用物品
+	network.GetMessageRouterInstance().Subscribe("proto.ItemUseRequest", network.MessageHandler{Op: us.itemUseRequest})
+	//丢弃物品
+	network.GetMessageRouterInstance().Subscribe("proto.ItemDiscardRequest", network.MessageHandler{Op: us.itemDiscardRequest})
+}
+
+func (us *UserService) itemDiscardRequest(msg network.Msg) {
+	rsq := msg.Message.(*proto.ItemDiscardRequest)
+	chr, ok := model.GetUnit(int(rsq.EntityId)).(*model.Character)
+	if !ok {
+		return
+	}
+	chr.Knapsack.Discard(int(rsq.SlotIndex), int(rsq.Count))
+	chr.SendInventory(true, false, false)
+}
+
+func (us *UserService) itemUseRequest(msg network.Msg) {
+	rsq := msg.Message.(*proto.ItemUseRequest)
+	chr, ok := model.GetUnit(int(rsq.EntityId)).(*model.Character)
+	if !ok {
+		return
+	}
+	chr.UseItem(int(rsq.SlotIndex))
+}
+
+func (us *UserService) itemPlacementRequest(msg network.Msg) {
+	rsq := msg.Message.(*proto.ItemPlacementRequest)
+	chr, ok := model.GetUnit(int(rsq.EntityId)).(*model.Character)
+	if !ok {
+		return
+	}
+	chr.Knapsack.Exchange(int(rsq.OriginIndex), int(rsq.TargetIndex))
+	//发送背包数据
+	chr.SendInventory(true, false, false)
+}
+
+func (us *UserService) inventoryRequest(msg network.Msg) {
+	rsq := msg.Message.(*proto.InventoryRequest)
+	chr, ok := model.GetUnit(int(rsq.EntityId)).(*model.Character)
+	if !ok {
+		return
+	}
+	//发送背包数据
+	chr.SendInventory(rsq.QueryKnapsack, rsq.QueryWarehouse, rsq.QueryEquipment)
+}
+
+func (us *UserService) pickupItemRequest(msg network.Msg) {
+	s1 := msg.Sender.Get("Session").(*model.Session)
+	if s1 == nil {
+		return
+	}
+	chr := s1.Character
+	logger.SLCError("%v", chr)
+	logger.SLCError("%v", chr.Position())
+	logger.SLCError("%v", chr.Space())
+	units := model.RangeUnit(chr.Position(), chr.Space().Id, 3000)
+	items := make([]*model.ItemEntity, 0)
+	for e := units.Front(); e != nil; e = e.Next() {
+		if ie, ok := e.Value.(*model.ItemEntity); ok {
+			items = append(items, ie)
+		}
+	}
+	if len(items) == 0 {
+		return
+	}
+	itemEntity := slices.MinFunc(items, func(a, b *model.ItemEntity) int {
+		f := vector3.GetDistance(a.Position(), chr.Position()) > vector3.GetDistance(b.Position(), chr.Position())
+		if f {
+			return 1
+		} else {
+			return 0
+		}
+	})
+	//如果添加失败则结束
+	if !chr.Knapsack.AddItem(itemEntity.Item().Id(), itemEntity.Item().Amount) {
+		return
+	}
+	//物品模型移出场景
+	chr.Space().EntityLeave(itemEntity)
+	model.GetEntityManagerInstance().RemoveEntity(chr.Space().Id, itemEntity)
+	logger.SLCInfo("玩家拾取物品Chr[%v],背包[%v]", chr.CharacterId(), chr.Knapsack.InventoryInfo())
+	//发送背包数据
+	chr.SendInventory(true, false, false)
 }
 
 func (us *UserService) reviveRequest(msg network.Msg) {
@@ -43,7 +131,7 @@ func (us *UserService) reviveRequest(msg network.Msg) {
 	actor := model.GetUnit(int(message.GetEntityId()))
 	if chr, ok := actor.(*model.Character); ok && chr.IsDeath() && chr.Conn == msg.Sender {
 		sp := GetSpaceServiceInstance().GetSpace(1)
-		chr.TelportSpace(sp, vector3.Zero3(), vector3.Zero3(), chr)
+		chr.TeleportSpace(sp, vector3.Zero3(), vector3.Zero3(), chr)
 		chr.Revive()
 	}
 }
@@ -209,6 +297,7 @@ func (us *UserService) gameEnterRequest(msg network.Msg) {
 	character.Conn = msg.Sender
 	//角色存入session
 	msg.Sender.Get("Session").(*model.Session).Character = character
+	logger.SLCInfo("%v", character.Speed())
 	////通知玩家登录成功
 	//response := &proto.GameEnterResponse{
 	//	Success:   true,
@@ -218,5 +307,5 @@ func (us *UserService) gameEnterRequest(msg network.Msg) {
 	//msg.Sender.Send(response)
 	//将新角色加入到地图
 	space := GetSpaceServiceInstance().GetSpace(dbRole.SpaceId) //新手村
-	space.CharacterJoin(character)
+	space.EntityEnter(character)
 }

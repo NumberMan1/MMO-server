@@ -9,6 +9,11 @@ import (
 
 type IActor interface {
 	entity.IEntity
+	Level() int
+	Exp() int
+	Gold() int
+	HPMax() int
+	MPMax() int
 	UnitState() proto.UnitState
 	SetUnitState(unitState proto.UnitState)
 	SkillMgr() *SkillManager
@@ -17,8 +22,6 @@ type IActor interface {
 	SetSpell(spell *Spell)
 	Hp() float32
 	Mp() float32
-	SetHp(hp float32)
-	SetMp(mp float32)
 	Id() int
 	Name() string
 	Type() proto.EntityType
@@ -38,10 +41,18 @@ type IActor interface {
 	IsDeath() bool
 	OnEnterSpace(space *Space, chr IActor)
 	Revive()
-	TelportSpace(space *Space, pos, dir *vector3.Vector3, chr IActor)
+	TeleportSpace(space *Space, pos, dir *vector3.Vector3, chr IActor)
 	Update()
 	Die(killerID int)
 	OnBeforeDie(killerID int)
 	OnAfterDie(killerID int)
 	RecvDamage(dmg *proto.Damage)
+	SetAndUpdateHp(hp float32)
+	SetAndUpdateMp(mp float32)
+	SetAndUpdateState(unitState proto.UnitState)
+	SetAndUpdateGolds(value int64)
+	SetAndUpdateExp(value int64)
+	SetAndUpdateLevel(value int)
+	OnHpMaxChanged(value float32)
+	OnMpMaxChanged(value float32)
 }
