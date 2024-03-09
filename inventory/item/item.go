@@ -55,7 +55,7 @@ func NewItem(def *define.ItemDefine, amount, position int) *Item {
 	i.SetId(def.GetId())
 	i.SetName(def.Name)
 	i.SetDescription(def.Description)
-	i.SetCapacity(def.Capicity)
+	i.SetCapacity(def.Capacity)
 	i.SetBuyPrice(def.BuyPrice)
 	i.SetSellingPrice(def.SellPrice)
 	i.SetSprite(def.Icon)

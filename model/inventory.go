@@ -44,7 +44,7 @@ func (i *Inventory) setCapacity(capacity int) {
 }
 
 func NewInventory(chr *Character) *Inventory {
-	return &Inventory{chr: chr, itemMap: &sync.Map{}}
+	return &Inventory{chr: chr}
 }
 
 func (i *Inventory) Chr() *Character {
@@ -129,7 +129,7 @@ func (i *Inventory) AddItem(itemId, amount int) bool {
 			index := i.findEmptyIndex()
 			if index > -1 {
 				//本次可处理的数量
-				current := min(amount, def.Capicity)
+				current := min(amount, def.Capacity)
 				i.SetItem(index, item.NewItem(def, current, index))
 				amount -= current
 			} else {
@@ -249,9 +249,9 @@ func (i *Inventory) calculateMaxRemainingQuantity(itemId int) int {
 			//如果物品类型相同
 			if item1.Id() == itemId {
 				quantity += item1.Capacity() - item1.Amount
+			} else {
+				quantity += def.Capacity
 			}
-		} else {
-			quantity += def.Capicity
 		}
 	}
 	logger.SLCDebug("Inventory：Entity[%v] 物品[%v]还能放入[%v]个", i.Chr().EntityId(), def.Name, quantity)

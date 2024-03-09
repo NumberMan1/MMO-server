@@ -56,7 +56,7 @@ func initServices() {
 	//传送门2：森林=>新手村
 	gate3 := model.NewGate(2, 4001001, vector3.NewVector3(346318, 1870, 319313), vector3.Zero3())
 	gate3.SetName("传送门-新手村")
-	gate3.SetTarget(model.GetSpaceManagerInstance().GetSpace(1), vector3.NewVector3(0, 0, 0))
+	gate3.SetTarget(model.GetSpaceManagerInstance().GetSpace(2), vector3.NewVector3(0, 0, 0))
 }
 
 func main() {

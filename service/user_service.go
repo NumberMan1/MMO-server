@@ -93,6 +93,9 @@ func (us *UserService) pickupItemRequest(msg network.Msg) {
 		return
 	}
 	chr := s1.Character
+	logger.SLCError("%v", chr)
+	logger.SLCError("%v", chr.Position())
+	logger.SLCError("%v", chr.Space())
 	units := model.RangeUnit(chr.Position(), chr.Space().Id, 3000)
 	items := make([]*model.ItemEntity, 0)
 	for e := units.Front(); e != nil; e = e.Next() {
@@ -136,7 +139,7 @@ func (us *UserService) reviveRequest(msg network.Msg) {
 func (us *UserService) userRegisterRequest(msg network.Msg) {
 	message := msg.Message.(*proto.UserRegisterRequest)
 	var num int64
-	database.OrmDb.Model(&database.DbPlayer{}).Where("username = ?", message.Username).Count(&num)
+	database.OrmDb.Where("username = ?", message.Username).Count(&num)
 	logger.SLCInfo("新用户注册:%s", message.Username)
 	resp := &proto.UserRegisterResponse{}
 	if num > 0 {
@@ -207,7 +210,7 @@ func (us *UserService) characterCreateRequest(msg network.Msg) {
 		return
 	}
 	var num int64
-	database.OrmDb.Model(&database.DbCharacter{}).Where("player_id = ?", player.ID).Count(&num)
+	database.OrmDb.Where("player_id = ?", player.ID).Count(&num)
 	if num >= 4 {
 		// 角色数量最多4个
 		logger.SLCInfo("角色数量最多4个")
@@ -232,7 +235,7 @@ func (us *UserService) characterCreateRequest(msg network.Msg) {
 		return
 	}
 	//检验角色名是否存在
-	database.OrmDb.Model(&database.DbCharacter{}).Where("name = ?", msgTemp.Name).Count(&num)
+	database.OrmDb.Where("name = ?", msgTemp.Name).Count(&num)
 	if num > 0 {
 		logger.SLCInfo("创建角色失败，角色名已存在")
 		rsp.Message = "创建角色失败，角色名已存在"
@@ -265,7 +268,6 @@ func (us *UserService) userLoginRequest(msg network.Msg) {
 	if result.Error != nil {
 		rsp.Success = false
 		rsp.Message = result.Error.Error()
-		msg.Sender.Send(rsp)
 		return
 	}
 	if result.RowsAffected > 0 {
@@ -295,6 +297,7 @@ func (us *UserService) gameEnterRequest(msg network.Msg) {
 	character.Conn = msg.Sender
 	//角色存入session
 	msg.Sender.Get("Session").(*model.Session).Character = character
+	logger.SLCInfo("%v", character.Speed())
 	////通知玩家登录成功
 	//response := &proto.GameEnterResponse{
 	//	Success:   true,

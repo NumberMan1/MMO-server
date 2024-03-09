@@ -5,7 +5,7 @@
     "ItemType": "消耗品",
     "Quality": "普通",
     "Description": "使用可以恢复少量生命值",
-    "Capicity": 999,
+    "Capacity": 999,
     "BuyPrice": 100,
     "SellPrice": 50,
     "Icon": "Sprites/Items/hp",

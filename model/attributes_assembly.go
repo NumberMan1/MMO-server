@@ -27,7 +27,7 @@ func NewAttributesAssembly() *AttributesAssembly {
 
 func (aa *AttributesAssembly) Init(actor IActor) {
 	aa.actor = actor
-	aa.Reload()
+
 }
 
 // Reload 重新加载
@@ -81,7 +81,6 @@ func (aa *AttributesAssembly) Reload() {
 	logger.SLCInfo("最终属性：%v", aa.Final)
 	//赋值与同步
 	aa.actor.SetSpeed(int(aa.Final.Speed))
-	logger.SLCInfo("最终属性speed：%v", aa.actor.Speed())
 	aa.actor.Info().Hpmax = aa.Final.HPMax
 	aa.actor.Info().Mpmax = aa.Final.MPMax
 	aa.actor.OnHpMaxChanged(aa.Final.HPMax)

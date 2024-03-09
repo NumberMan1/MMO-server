@@ -23,6 +23,7 @@ type DataManager struct {
 
 // Init 从mongodb中读取地图,单位,刷怪,技能信息
 func (dm *DataManager) Init() {
+	//logger.SLCDebug("%v", dm.Skills)
 	ctx := context.TODO()
 	loadFromMongo[*SpaceDefine](ctx, dm.Spaces, database.MongoDbClient, func() *SpaceDefine {
 		return &SpaceDefine{}
@@ -39,7 +40,6 @@ func (dm *DataManager) Init() {
 	loadFromMongo[*ItemDefine](ctx, dm.Items, database.MongoDbClient, func() *ItemDefine {
 		return &ItemDefine{}
 	})
-	//logger.SLCDebug("%v", *dm.Items[1002])
 }
 
 func loadFromMongo[T IDefine](ctx context.Context, kv map[int]T, client *mongobrocker.Client, constructor func() T) {
@@ -52,7 +52,7 @@ func loadFromMongo[T IDefine](ctx context.Context, kv map[int]T, client *mongobr
 		err = cursor.Decode(st)
 		r := constructor()
 		bytes, err := bson.Marshal(st["base_info"])
-		_ = bson.Unmarshal(bytes, r)
+		bson.Unmarshal(bytes, r)
 		if err != nil {
 			panic(err)
 		}
