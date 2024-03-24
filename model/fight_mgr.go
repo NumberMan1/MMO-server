@@ -12,6 +12,7 @@ type FightMgr struct {
 	space *Space
 	//投射物列表
 	Missiles *list.List
+
 	//技能施法队列
 	CastQueue *ns.TSQueue[*proto.CastInfo]
 	//等待广播的队列
@@ -20,6 +21,7 @@ type FightMgr struct {
 	DamageQueue *ns.TSQueue[*proto.Damage]
 	//角色属性变动
 	PropertyUpdateQueue *ns.TSQueue[*proto.PropertyUpdate]
+
 	//施法响应对象，每帧发送一次
 	spellResponse *proto.SpellResponse
 	//伤害消息，每帧发送一次
