@@ -397,6 +397,7 @@ func (a *Actor) SetAndUpdateLevel(value int) {
 	}
 	oldValue := a.Info().Level
 	a.Info().Level = int32(value)
+	a.Attr().Reload()
 	rsp := &proto.PropertyUpdate{
 		EntityId: int32(a.EntityId()),
 		Property: proto.PropertyUpdate_Level,

@@ -2,6 +2,7 @@ package model
 
 import (
 	"github.com/NumberMan1/MMO-server/core/vector3"
+	"github.com/NumberMan1/common/logger"
 	"github.com/NumberMan1/common/summer"
 	"github.com/NumberMan1/common/summer/protocol/gen/proto"
 	"github.com/NumberMan1/common/summer/timeunit"
@@ -57,6 +58,9 @@ func (m *Monster) MoveTo(target *vector3.Vector3) {
 	if m.MoveTarget != target {
 		m.MoveTarget = target
 		m.MovePosition = m.Position()
+		logger.SLCDebug("-----------------")
+		logger.SLCDebug("%d position %v", m.EntityId(), *m.MovePosition)
+		logger.SLCDebug("-----------------")
 		dir := vector3.Normalize3(vector3.Sub3(m.MoveTarget, m.MovePosition))
 		m.SetDirection(vector3.Dot(m.LookRotation(dir), y1000))
 		//广播消息
@@ -91,6 +95,9 @@ func (m *Monster) Update() {
 		//移动方向
 		dir := vector3.Normalize3(vector3.Sub3(m.MoveTarget, m.MovePosition))
 		m.SetDirection(vector3.Dot(m.LookRotation(dir), y1000))
+		//logger.SLCDebug("-----------------")
+		//logger.SLCDebug("%d speed %v", m.EntityId(), m.Speed())
+		//logger.SLCDebug("-----------------")
 		dist := float64(m.Speed()) * timeunit.DeltaTime
 		if vector3.GetDistance(m.MoveTarget, m.MovePosition) < dist {
 			m.StopMove()
@@ -138,7 +145,7 @@ func (m *Monster) RandomPointWithBirth(r float64) *vector3.Vector3 {
 
 func (m *Monster) Attack(target IActor) {
 	var sk *Skill = nil
-	for e := m.skillMgr.Skills.Front(); e != nil; e = e.Next() {
+	for e := m.SkillMgr().Skills.Front(); e != nil; e = e.Next() {
 		if e.Value.(*Skill).IsNormal() {
 			sk = e.Value.(*Skill)
 			break
