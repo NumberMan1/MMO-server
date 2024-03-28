@@ -6,7 +6,7 @@ type ItemDefine struct {
 	ItemType    string  `json:"ItemType" bson:"item_type"`      //物品类别
 	Quality     string  `json:"Quality" bson:"quality"`         //品质
 	Description string  `json:"Description" bson:"description"` //介绍
-	Capacity    int     `json:"Capacity" bson:"capacity"`       //堆叠上限
+	Capicity    int     `json:"Capicity" bson:"capicity"`       //堆叠上限
 	BuyPrice    int     `json:"BuyPrice" bson:"buy_price"`      //买入价格
 	SellPrice   int     `json:"SellPrice" bson:"sell_price"`    //卖出价格
 	Icon        string  `json:"Icon" bson:"icon"`               //图标资源

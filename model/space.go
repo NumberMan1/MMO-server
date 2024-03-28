@@ -46,6 +46,7 @@ func (s *Space) CharacterJoin(character *Character) {
 	//character.OnEnterSpace(s, character)
 	//记录到主角字典
 	s.characterDict[character.EntityId()] = character
+	character.SetSpace(s)
 	//拉取附近的演员信息
 	rsp := &pt.SpaceEnterResponse{
 		Character: character.Info(),
