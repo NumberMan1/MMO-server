@@ -295,6 +295,7 @@ func (us *UserService) gameEnterRequest(msg network.Msg) {
 	character.Conn = msg.Sender
 	//角色存入session
 	msg.Sender.Get("Session").(*model.Session).Character = character
+	logger.SLCInfo("%v", character.Speed())
 	////通知玩家登录成功
 	//response := &proto.GameEnterResponse{
 	//	Success:   true,
