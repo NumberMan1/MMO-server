@@ -52,7 +52,7 @@ func loadFromMongo[T IDefine](ctx context.Context, kv map[int]T, client *mongobr
 		err = cursor.Decode(st)
 		r := constructor()
 		bytes, err := bson.Marshal(st["base_info"])
-		_ := bson.Unmarshal(bytes, r)
+		_ = bson.Unmarshal(bytes, r)
 		if err != nil {
 			panic(err)
 		}
