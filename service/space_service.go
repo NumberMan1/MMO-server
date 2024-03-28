@@ -47,7 +47,6 @@ func (ss *SpaceService) spaceEntitySyncRequest(msg network.Msg) {
 	netV3 := vector3.NewVector3(float64(netEntity.Position.X), float64(netEntity.Position.Y), float64(netEntity.Position.Z))
 	//服务端实际的角色信息
 	serEntity := model.GetEntityManagerInstance().GetEntity(int(netEntity.Id))
-	logger.SLCInfo("%v", serEntity)
 	serV3 := vector3.NewVector3(serEntity.Position().X, serEntity.Position().Y, serEntity.Position().Z)
 	//计算距离
 	distance := vector3.GetDistance(netV3, serV3)

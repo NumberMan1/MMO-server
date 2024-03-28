@@ -93,9 +93,6 @@ func (us *UserService) pickupItemRequest(msg network.Msg) {
 		return
 	}
 	chr := s1.Character
-	logger.SLCError("%v", chr)
-	logger.SLCError("%v", chr.Position())
-	logger.SLCError("%v", chr.Space())
 	units := model.RangeUnit(chr.Position(), chr.Space().Id, 3000)
 	items := make([]*model.ItemEntity, 0)
 	for e := units.Front(); e != nil; e = e.Next() {
