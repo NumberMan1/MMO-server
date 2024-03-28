@@ -2,7 +2,6 @@ package model
 
 import (
 	"github.com/NumberMan1/MMO-server/core/vector3"
-	"github.com/NumberMan1/common/logger"
 	"github.com/NumberMan1/common/summer"
 	"github.com/NumberMan1/common/summer/protocol/gen/proto"
 	"github.com/NumberMan1/common/summer/timeunit"
@@ -58,9 +57,6 @@ func (m *Monster) MoveTo(target *vector3.Vector3) {
 	if m.MoveTarget != target {
 		m.MoveTarget = target
 		m.MovePosition = m.Position()
-		logger.SLCDebug("-----------------")
-		logger.SLCDebug("%d position %v", m.EntityId(), *m.MovePosition)
-		logger.SLCDebug("-----------------")
 		dir := vector3.Normalize3(vector3.Sub3(m.MoveTarget, m.MovePosition))
 		m.SetDirection(vector3.Dot(m.LookRotation(dir), y1000))
 		//广播消息
