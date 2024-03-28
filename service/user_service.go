@@ -8,6 +8,7 @@ import (
 	"github.com/NumberMan1/common/ns/singleton"
 	"github.com/NumberMan1/common/summer/network"
 	"github.com/NumberMan1/common/summer/protocol/gen/proto"
+	"slices"
 	"strings"
 	"unicode/utf8"
 )
