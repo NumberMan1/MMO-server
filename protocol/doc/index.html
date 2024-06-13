@@ -1,0 +1,3001 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>Protocol Documentation</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Ubuntu:400,700,400italic"/>
+    <style>
+      body {
+        width: 60em;
+        margin: 1em auto;
+        color: #222;
+        font-family: "Ubuntu", sans-serif;
+        padding-bottom: 4em;
+      }
+
+      h1 {
+        font-weight: normal;
+        border-bottom: 1px solid #aaa;
+        padding-bottom: 0.5ex;
+      }
+
+      h2 {
+        border-bottom: 1px solid #aaa;
+        padding-bottom: 0.5ex;
+        margin: 1.5em 0;
+      }
+
+      h3 {
+        font-weight: normal;
+        border-bottom: 1px solid #aaa;
+        padding-bottom: 0.5ex;
+      }
+
+      a {
+        text-decoration: none;
+        color: #567e25;
+      }
+
+      table {
+        width: 100%;
+        font-size: 80%;
+        border-collapse: collapse;
+      }
+
+      thead {
+        font-weight: 700;
+        background-color: #dcdcdc;
+      }
+
+      tbody tr:nth-child(even) {
+        background-color: #fbfbfb;
+      }
+
+      td {
+        border: 1px solid #ccc;
+        padding: 0.5ex 2ex;
+      }
+
+      td p {
+        text-indent: 1em;
+        margin: 0;
+      }
+
+      td p:nth-child(1) {
+        text-indent: 0;  
+      }
+
+       
+      .field-table td:nth-child(1) {  
+        width: 10em;
+      }
+      .field-table td:nth-child(2) {  
+        width: 10em;
+      }
+      .field-table td:nth-child(3) {  
+        width: 6em;
+      }
+      .field-table td:nth-child(4) {  
+        width: auto;
+      }
+
+       
+      .extension-table td:nth-child(1) {  
+        width: 10em;
+      }
+      .extension-table td:nth-child(2) {  
+        width: 10em;
+      }
+      .extension-table td:nth-child(3) {  
+        width: 10em;
+      }
+      .extension-table td:nth-child(4) {  
+        width: 5em;
+      }
+      .extension-table td:nth-child(5) {  
+        width: auto;
+      }
+
+       
+      .enum-table td:nth-child(1) {  
+        width: 10em;
+      }
+      .enum-table td:nth-child(2) {  
+        width: 10em;
+      }
+      .enum-table td:nth-child(3) {  
+        width: auto;
+      }
+
+       
+      .scalar-value-types-table tr {
+        height: 3em;
+      }
+
+       
+      #toc-container ul {
+        list-style-type: none;
+        padding-left: 1em;
+        line-height: 180%;
+        margin: 0;
+      }
+      #toc > li > a {
+        font-weight: bold;
+      }
+
+       
+      .file-heading {
+        width: 100%;
+        display: table;
+        border-bottom: 1px solid #aaa;
+        margin: 4em 0 1.5em 0;
+      }
+      .file-heading h2 {
+        border: none;
+        display: table-cell;
+      }
+      .file-heading a {
+        text-align: right;
+        display: table-cell;
+      }
+
+       
+      .badge {
+        width: 1.6em;
+        height: 1.6em;
+        display: inline-block;
+
+        line-height: 1.6em;
+        text-align: center;
+        font-weight: bold;
+        font-size: 60%;
+
+        color: #89ba48;
+        background-color: #dff0c8;
+
+        margin: 0.5ex 1em 0.5ex -1em;
+        border: 1px solid #fbfbfb;
+        border-radius: 1ex;
+      }
+    </style>
+
+    
+    <link rel="stylesheet" type="text/css" href="stylesheet.css"/>
+  </head>
+
+  <body>
+
+    <h1 id="title">Protocol Documentation</h1>
+
+    <h2>Table of Contents</h2>
+
+    <div id="toc-container">
+      <ul id="toc">
+        
+          
+          <li>
+            <a href="#proto%2fibase.proto">proto/ibase.proto</a>
+            <ul>
+              
+                <li>
+                  <a href="#proto.Rpc"><span class="badge">M</span>Rpc</a>
+                </li>
+              
+              
+              
+              
+            </ul>
+          </li>
+        
+          
+          <li>
+            <a href="#proto%2fmessage.proto">proto/message.proto</a>
+            <ul>
+              
+                <li>
+                  <a href="#proto.CastInfo"><span class="badge">M</span>CastInfo</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.CharacterCreateRequest"><span class="badge">M</span>CharacterCreateRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.CharacterDeleteRequest"><span class="badge">M</span>CharacterDeleteRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.CharacterDeleteResponse"><span class="badge">M</span>CharacterDeleteResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.CharacterListRequest"><span class="badge">M</span>CharacterListRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.CharacterListResponse"><span class="badge">M</span>CharacterListResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.ChatRequest"><span class="badge">M</span>ChatRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.ChatResponse"><span class="badge">M</span>ChatResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.ChracterCreateResponse"><span class="badge">M</span>ChracterCreateResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.Damage"><span class="badge">M</span>Damage</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.DamageResponse"><span class="badge">M</span>DamageResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.EntityEnterResponse"><span class="badge">M</span>EntityEnterResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.EntitySyncResponse"><span class="badge">M</span>EntitySyncResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.EquipData"><span class="badge">M</span>EquipData</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.EquipsResponse"><span class="badge">M</span>EquipsResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.ExitRequest"><span class="badge">M</span>ExitRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.ExitResponse"><span class="badge">M</span>ExitResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.GameEnterRequest"><span class="badge">M</span>GameEnterRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.GameEnterResponse"><span class="badge">M</span>GameEnterResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.HeartBeatRequest"><span class="badge">M</span>HeartBeatRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.HeartBeatResponse"><span class="badge">M</span>HeartBeatResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.InventoryInfo"><span class="badge">M</span>InventoryInfo</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.InventoryRequest"><span class="badge">M</span>InventoryRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.InventoryResponse"><span class="badge">M</span>InventoryResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.ItemAttachRequest"><span class="badge">M</span>ItemAttachRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.ItemDetachRequest"><span class="badge">M</span>ItemDetachRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.ItemDiscardRequest"><span class="badge">M</span>ItemDiscardRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.ItemInfo"><span class="badge">M</span>ItemInfo</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.ItemPlacementRequest"><span class="badge">M</span>ItemPlacementRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.ItemUpdate"><span class="badge">M</span>ItemUpdate</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.ItemUseRequest"><span class="badge">M</span>ItemUseRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.NetActor"><span class="badge">M</span>NetActor</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.NetEntity"><span class="badge">M</span>NetEntity</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.NetEntitySync"><span class="badge">M</span>NetEntitySync</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.PickupItemRequest"><span class="badge">M</span>PickupItemRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.PropertyUpdate"><span class="badge">M</span>PropertyUpdate</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.PropertyUpdate.PropertyValue"><span class="badge">M</span>PropertyUpdate.PropertyValue</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.PropertyUpdateResponse"><span class="badge">M</span>PropertyUpdateResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.ReconnectRequest"><span class="badge">M</span>ReconnectRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.ReconnectResponse"><span class="badge">M</span>ReconnectResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.ReviveRequest"><span class="badge">M</span>ReviveRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.SkillInfo"><span class="badge">M</span>SkillInfo</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.SpaceCharacterLeaveResponse"><span class="badge">M</span>SpaceCharacterLeaveResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.SpaceCharactersEnterResponse"><span class="badge">M</span>SpaceCharactersEnterResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.SpaceEnterResponse"><span class="badge">M</span>SpaceEnterResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.SpaceEntitySyncRequest"><span class="badge">M</span>SpaceEntitySyncRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.SpaceEntitySyncResponse"><span class="badge">M</span>SpaceEntitySyncResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.SpellFailResponse"><span class="badge">M</span>SpellFailResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.SpellRequest"><span class="badge">M</span>SpellRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.SpellResponse"><span class="badge">M</span>SpellResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.UserLoginRequest"><span class="badge">M</span>UserLoginRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.UserLoginResponse"><span class="badge">M</span>UserLoginResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.UserRegisterRequest"><span class="badge">M</span>UserRegisterRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.UserRegisterResponse"><span class="badge">M</span>UserRegisterResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.Vec3"><span class="badge">M</span>Vec3</a>
+                </li>
+              
+              
+                <li>
+                  <a href="#proto.BuffConflict"><span class="badge">E</span>BuffConflict</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.BuffType"><span class="badge">E</span>BuffType</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.CastResult"><span class="badge">E</span>CastResult</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.DamageType"><span class="badge">E</span>DamageType</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.EntityState"><span class="badge">E</span>EntityState</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.EntityType"><span class="badge">E</span>EntityType</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.EquipsType"><span class="badge">E</span>EquipsType</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.ItemType"><span class="badge">E</span>ItemType</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.ItemUpdate.UpdateType"><span class="badge">E</span>ItemUpdate.UpdateType</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.PropertyUpdate.Prop"><span class="badge">E</span>PropertyUpdate.Prop</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.Quality"><span class="badge">E</span>Quality</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.UnitState"><span class="badge">E</span>UnitState</a>
+                </li>
+              
+              
+              
+            </ul>
+          </li>
+        
+        <li><a href="#scalar-value-types">Scalar Value Types</a></li>
+      </ul>
+    </div>
+
+    
+      
+      <div class="file-heading">
+        <h2 id="proto/ibase.proto">proto/ibase.proto</h2><a href="#title">Top</a>
+      </div>
+      <p></p>
+
+      
+        <h3 id="proto.Rpc">Rpc</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>id</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>target</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>args</td>
+                  <td><a href="#bytes">bytes</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+
+      
+
+      
+
+      
+    
+      
+      <div class="file-heading">
+        <h2 id="proto/message.proto">proto/message.proto</h2><a href="#title">Top</a>
+      </div>
+      <p></p>
+
+      
+        <h3 id="proto.CastInfo">CastInfo</h3>
+        <p>施法信息</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>casterId</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>施法者id </p></td>
+                </tr>
+              
+                <tr>
+                  <td>skillId</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>技能id </p></td>
+                </tr>
+              
+                <tr>
+                  <td>targetId</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>技能施放单位 </p></td>
+                </tr>
+              
+                <tr>
+                  <td>targetLoc</td>
+                  <td><a href="#proto.Vec3">Vec3</a></td>
+                  <td></td>
+                  <td><p>技能施放点 </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.CharacterCreateRequest">CharacterCreateRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>jobType</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.CharacterDeleteRequest">CharacterDeleteRequest</h3>
+        <p>删除角色的请求</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>characterId</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.CharacterDeleteResponse">CharacterDeleteResponse</h3>
+        <p>删除角色的响应</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>success</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>message</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.CharacterListRequest">CharacterListRequest</h3>
+        <p>查询角色列表的请求</p>
+
+        
+
+        
+      
+        <h3 id="proto.CharacterListResponse">CharacterListResponse</h3>
+        <p>角色列表的响应</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>characterList</td>
+                  <td><a href="#proto.NetActor">NetActor</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.ChatRequest">ChatRequest</h3>
+        <p>聊天请求</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>text_value</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>消息文本 </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.ChatResponse">ChatResponse</h3>
+        <p>聊天响应</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>sender_id</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>发送者entityID </p></td>
+                </tr>
+              
+                <tr>
+                  <td>text_value</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>消息文本 </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.ChracterCreateResponse">ChracterCreateResponse</h3>
+        <p>创建角色的响应</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>success</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>message</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>character</td>
+                  <td><a href="#proto.NetActor">NetActor</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.Damage">Damage</h3>
+        <p>伤害数据</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>attackerId</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>攻击者 </p></td>
+                </tr>
+              
+                <tr>
+                  <td>targetId</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>被攻击者 </p></td>
+                </tr>
+              
+                <tr>
+                  <td>skillId</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>技能 </p></td>
+                </tr>
+              
+                <tr>
+                  <td>amount</td>
+                  <td><a href="#float">float</a></td>
+                  <td></td>
+                  <td><p>伤害数值 </p></td>
+                </tr>
+              
+                <tr>
+                  <td>damageType</td>
+                  <td><a href="#proto.DamageType">DamageType</a></td>
+                  <td></td>
+                  <td><p>伤害类型 </p></td>
+                </tr>
+              
+                <tr>
+                  <td>isCrit</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p>是否暴击 </p></td>
+                </tr>
+              
+                <tr>
+                  <td>isMiss</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p>是否miss </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.DamageResponse">DamageResponse</h3>
+        <p>通知客户端有人受到伤害</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>list</td>
+                  <td><a href="#proto.Damage">Damage</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.EntityEnterResponse">EntityEnterResponse</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>entity</td>
+                  <td><a href="#proto.NetEntity">NetEntity</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.EntitySyncResponse">EntitySyncResponse</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>entityList</td>
+                  <td><a href="#proto.NetEntity">NetEntity</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.EquipData">EquipData</h3>
+        <p>装备数据</p><p>打孔、镶嵌、宝石、强化</p>
+
+        
+
+        
+      
+        <h3 id="proto.EquipsResponse">EquipsResponse</h3>
+        <p>角色装备发给客户端</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>entityId</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>equipsList</td>
+                  <td><a href="#proto.ItemInfo">ItemInfo</a></td>
+                  <td>repeated</td>
+                  <td><p>穿戴装备 </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.ExitRequest">ExitRequest</h3>
+        <p>请求退出游戏</p>
+
+        
+
+        
+      
+        <h3 id="proto.ExitResponse">ExitResponse</h3>
+        <p>通知客户端退出游戏</p>
+
+        
+
+        
+      
+        <h3 id="proto.GameEnterRequest">GameEnterRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>characterId</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.GameEnterResponse">GameEnterResponse</h3>
+        <p>加入游戏的响应</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>success</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>entity</td>
+                  <td><a href="#proto.NetEntity">NetEntity</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>character</td>
+                  <td><a href="#proto.NetActor">NetActor</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.HeartBeatRequest">HeartBeatRequest</h3>
+        <p></p>
+
+        
+
+        
+      
+        <h3 id="proto.HeartBeatResponse">HeartBeatResponse</h3>
+        <p></p>
+
+        
+
+        
+      
+        <h3 id="proto.InventoryInfo">InventoryInfo</h3>
+        <p>库存对象</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>capacity</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>格子数量 </p></td>
+                </tr>
+              
+                <tr>
+                  <td>list</td>
+                  <td><a href="#proto.ItemInfo">ItemInfo</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.InventoryRequest">InventoryRequest</h3>
+        <p>查询背包信息</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>entityId</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>queryKnapsack</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p>是否查询背包 </p></td>
+                </tr>
+              
+                <tr>
+                  <td>queryWarehouse</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p>是否查询仓库 </p></td>
+                </tr>
+              
+                <tr>
+                  <td>queryEquipment</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p>是否查询装备栏 </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.InventoryResponse">InventoryResponse</h3>
+        <p>角色的背包信息</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>entityId</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>knapsackInfo</td>
+                  <td><a href="#proto.InventoryInfo">InventoryInfo</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>warehouseInfo</td>
+                  <td><a href="#proto.InventoryInfo">InventoryInfo</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>equipmentInfo</td>
+                  <td><a href="#proto.InventoryInfo">InventoryInfo</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.ItemAttachRequest">ItemAttachRequest</h3>
+        <p>穿戴装备</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>entityId</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>穿装备的人 </p></td>
+                </tr>
+              
+                <tr>
+                  <td>slotIndex</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>背包里的插槽位置 </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.ItemDetachRequest">ItemDetachRequest</h3>
+        <p>脱下装备</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>entityId</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>equipsType</td>
+                  <td><a href="#proto.EquipsType">EquipsType</a></td>
+                  <td></td>
+                  <td><p>装备类型 </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.ItemDiscardRequest">ItemDiscardRequest</h3>
+        <p>丢弃的物品的请求</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>entityId</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>slotIndex</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>插槽索引 </p></td>
+                </tr>
+              
+                <tr>
+                  <td>count</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>丢弃数量 </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.ItemInfo">ItemInfo</h3>
+        <p>物品信息</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>itemId</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>物品ID </p></td>
+                </tr>
+              
+                <tr>
+                  <td>amount</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>物品数量 </p></td>
+                </tr>
+              
+                <tr>
+                  <td>position</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>所处位置 </p></td>
+                </tr>
+              
+                <tr>
+                  <td>EquipData</td>
+                  <td><a href="#proto.EquipData">EquipData</a></td>
+                  <td></td>
+                  <td><p>装备信息，拥有此属性代表这是装备 </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.ItemPlacementRequest">ItemPlacementRequest</h3>
+        <p>物品放置请求</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>entityId</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>originIndex</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>原始索引 </p></td>
+                </tr>
+              
+                <tr>
+                  <td>targetIndex</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>目标索引 </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.ItemUpdate">ItemUpdate</h3>
+        <p>物品更新</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>type</td>
+                  <td><a href="#proto.ItemUpdate.UpdateType">ItemUpdate.UpdateType</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>item</td>
+                  <td><a href="#proto.ItemInfo">ItemInfo</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.ItemUseRequest">ItemUseRequest</h3>
+        <p>使用物品的请求</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>entityId</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>使用物品的人 </p></td>
+                </tr>
+              
+                <tr>
+                  <td>slotIndex</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>使用哪个插槽的物品 </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.NetActor">NetActor</h3>
+        <p>角色信息</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>id</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>tid</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>单位类型=职业=TID </p></td>
+                </tr>
+              
+                <tr>
+                  <td>name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>level</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>exp</td>
+                  <td><a href="#int64">int64</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>spaceId</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>gold</td>
+                  <td><a href="#int64">int64</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>entity</td>
+                  <td><a href="#proto.NetEntity">NetEntity</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>hp</td>
+                  <td><a href="#float">float</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>mp</td>
+                  <td><a href="#float">float</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>type</td>
+                  <td><a href="#proto.EntityType">EntityType</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>Skills</td>
+                  <td><a href="#proto.SkillInfo">SkillInfo</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>itemInfo</td>
+                  <td><a href="#proto.ItemInfo">ItemInfo</a></td>
+                  <td></td>
+                  <td><p>InventoryInfo equipsData = 16;
+
+物品实体专用属性 </p></td>
+                </tr>
+              
+                <tr>
+                  <td>hpmax</td>
+                  <td><a href="#float">float</a></td>
+                  <td></td>
+                  <td><p>生命上限 </p></td>
+                </tr>
+              
+                <tr>
+                  <td>mpmax</td>
+                  <td><a href="#float">float</a></td>
+                  <td></td>
+                  <td><p>法力上限 </p></td>
+                </tr>
+              
+                <tr>
+                  <td>equipsList</td>
+                  <td><a href="#proto.ItemInfo">ItemInfo</a></td>
+                  <td>repeated</td>
+                  <td><p>穿戴装备 </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.NetEntity">NetEntity</h3>
+        <p>实体信息</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>id</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>position</td>
+                  <td><a href="#proto.Vec3">Vec3</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>direction</td>
+                  <td><a href="#proto.Vec3">Vec3</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>speed</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.NetEntitySync">NetEntitySync</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>entity</td>
+                  <td><a href="#proto.NetEntity">NetEntity</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>state</td>
+                  <td><a href="#proto.EntityState">EntityState</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>force</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.PickupItemRequest">PickupItemRequest</h3>
+        <p>拾取物品的请求</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>entityId</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>物品实体的entityId </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.PropertyUpdate">PropertyUpdate</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>entity_id</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>property</td>
+                  <td><a href="#proto.PropertyUpdate.Prop">PropertyUpdate.Prop</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>oldValue</td>
+                  <td><a href="#proto.PropertyUpdate.PropertyValue">PropertyUpdate.PropertyValue</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>newValue</td>
+                  <td><a href="#proto.PropertyUpdate.PropertyValue">PropertyUpdate.PropertyValue</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.PropertyUpdate.PropertyValue">PropertyUpdate.PropertyValue</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>int_value</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>21亿 </p></td>
+                </tr>
+              
+                <tr>
+                  <td>float_value</td>
+                  <td><a href="#float">float</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>string_value</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>state_value</td>
+                  <td><a href="#proto.UnitState">UnitState</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>long_value</td>
+                  <td><a href="#int64">int64</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.PropertyUpdateResponse">PropertyUpdateResponse</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>list</td>
+                  <td><a href="#proto.PropertyUpdate">PropertyUpdate</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.ReconnectRequest">ReconnectRequest</h3>
+        <p>重连请求</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>sessionId</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.ReconnectResponse">ReconnectResponse</h3>
+        <p>重连结果</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>success</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p>是否重连成功 </p></td>
+                </tr>
+              
+                <tr>
+                  <td>entityId</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>重连的角色，0代表未选择角色 </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.ReviveRequest">ReviveRequest</h3>
+        <p>请求复活</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>entityId</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.SkillInfo">SkillInfo</h3>
+        <p>技能信息</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>id</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>技能ID </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.SpaceCharacterLeaveResponse">SpaceCharacterLeaveResponse</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>entityId</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.SpaceCharactersEnterResponse">SpaceCharactersEnterResponse</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>spaceId</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>characterList</td>
+                  <td><a href="#proto.NetActor">NetActor</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.SpaceEnterResponse">SpaceEnterResponse</h3>
+        <p>角色进入场景</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>character</td>
+                  <td><a href="#proto.NetActor">NetActor</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>list</td>
+                  <td><a href="#proto.NetActor">NetActor</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.SpaceEntitySyncRequest">SpaceEntitySyncRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>entitySync</td>
+                  <td><a href="#proto.NetEntitySync">NetEntitySync</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.SpaceEntitySyncResponse">SpaceEntitySyncResponse</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>entitySync</td>
+                  <td><a href="#proto.NetEntitySync">NetEntitySync</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.SpellFailResponse">SpellFailResponse</h3>
+        <p>技能施放错误（只有施法玩家才会收到）</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>casterId</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>施法者id </p></td>
+                </tr>
+              
+                <tr>
+                  <td>skillId</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>技能id </p></td>
+                </tr>
+              
+                <tr>
+                  <td>reason</td>
+                  <td><a href="#proto.CastResult">CastResult</a></td>
+                  <td></td>
+                  <td><p>失败原因 </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.SpellRequest">SpellRequest</h3>
+        <p>施放请求</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>info</td>
+                  <td><a href="#proto.CastInfo">CastInfo</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.SpellResponse">SpellResponse</h3>
+        <p>通知客户端执行技能</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>castList</td>
+                  <td><a href="#proto.CastInfo">CastInfo</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.UserLoginRequest">UserLoginRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>username</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>password</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.UserLoginResponse">UserLoginResponse</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>success</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>code</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>message</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>sessionId</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.UserRegisterRequest">UserRegisterRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>username</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>password</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.UserRegisterResponse">UserRegisterResponse</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>code</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>message</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.Vec3">Vec3</h3>
+        <p>用于网络传输的三维向量</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>x</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>y</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>z</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+
+      
+        <h3 id="proto.BuffConflict">BuffConflict</h3>
+        <p>buff叠加方式</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>Combine</td>
+                <td>0</td>
+                <td><p>合并为一个buff，叠层（提高等级）</p></td>
+              </tr>
+            
+              <tr>
+                <td>Separate</td>
+                <td>1</td>
+                <td><p>独立存在</p></td>
+              </tr>
+            
+              <tr>
+                <td>Cover</td>
+                <td>2</td>
+                <td><p>覆盖，后者覆盖前者</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="proto.BuffType">BuffType</h3>
+        <p>buff类型</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>None</td>
+                <td>0</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>Buff</td>
+                <td>1</td>
+                <td><p>正增益</p></td>
+              </tr>
+            
+              <tr>
+                <td>Debuff</td>
+                <td>2</td>
+                <td><p>负增益</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="proto.CastResult">CastResult</h3>
+        <p>技能施放结果</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>Success</td>
+                <td>0</td>
+                <td><p>成功</p></td>
+              </tr>
+            
+              <tr>
+                <td>IsPassive</td>
+                <td>1</td>
+                <td><p>被动技能</p></td>
+              </tr>
+            
+              <tr>
+                <td>MpLack</td>
+                <td>2</td>
+                <td><p>MP不足</p></td>
+              </tr>
+            
+              <tr>
+                <td>EntityDead</td>
+                <td>3</td>
+                <td><p>Entity已经死亡</p></td>
+              </tr>
+            
+              <tr>
+                <td>OutOfRange</td>
+                <td>5</td>
+                <td><p>超出范围</p></td>
+              </tr>
+            
+              <tr>
+                <td>Running</td>
+                <td>6</td>
+                <td><p>进行中</p></td>
+              </tr>
+            
+              <tr>
+                <td>Cooldown</td>
+                <td>7</td>
+                <td><p>冷却中</p></td>
+              </tr>
+            
+              <tr>
+                <td>TargetError</td>
+                <td>8</td>
+                <td><p>目标错误</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="proto.DamageType">DamageType</h3>
+        <p>伤害类型</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>UNKNOWN</td>
+                <td>0</td>
+                <td><p>默认值，表示未知或未设置</p></td>
+              </tr>
+            
+              <tr>
+                <td>PHYSICAL</td>
+                <td>1</td>
+                <td><p>物理伤害</p></td>
+              </tr>
+            
+              <tr>
+                <td>MAGICAL</td>
+                <td>2</td>
+                <td><p>魔法伤害</p></td>
+              </tr>
+            
+              <tr>
+                <td>REAL</td>
+                <td>3</td>
+                <td><p>真实伤害，通常不受任何防御属性影响</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="proto.EntityState">EntityState</h3>
+        <p>实体状态</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>NONE</td>
+                <td>0</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>IDLE</td>
+                <td>1</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>MOVE</td>
+                <td>2</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>JUMP</td>
+                <td>3</td>
+                <td><p></p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="proto.EntityType">EntityType</h3>
+        <p></p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>Character</td>
+                <td>0</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>Monster</td>
+                <td>1</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>NPC</td>
+                <td>2</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>Item</td>
+                <td>3</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>Gate</td>
+                <td>4</td>
+                <td><p></p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="proto.EquipsType">EquipsType</h3>
+        <p>装备类型</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>UNSET</td>
+                <td>0</td>
+                <td><p>无</p></td>
+              </tr>
+            
+              <tr>
+                <td>Weapon</td>
+                <td>1</td>
+                <td><p>武器</p></td>
+              </tr>
+            
+              <tr>
+                <td>Chest</td>
+                <td>2</td>
+                <td><p>胸甲</p></td>
+              </tr>
+            
+              <tr>
+                <td>Belt</td>
+                <td>4</td>
+                <td><p>腰带</p></td>
+              </tr>
+            
+              <tr>
+                <td>Legs</td>
+                <td>5</td>
+                <td><p>裤子</p></td>
+              </tr>
+            
+              <tr>
+                <td>Boots</td>
+                <td>6</td>
+                <td><p>鞋子</p></td>
+              </tr>
+            
+              <tr>
+                <td>Ring</td>
+                <td>7</td>
+                <td><p>戒指</p></td>
+              </tr>
+            
+              <tr>
+                <td>Neck</td>
+                <td>8</td>
+                <td><p>项链</p></td>
+              </tr>
+            
+              <tr>
+                <td>Wings</td>
+                <td>10</td>
+                <td><p>翅膀</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="proto.ItemType">ItemType</h3>
+        <p>物品类型</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>Material</td>
+                <td>0</td>
+                <td><p>材料&amp;道具</p></td>
+              </tr>
+            
+              <tr>
+                <td>Consumable</td>
+                <td>1</td>
+                <td><p>消耗品</p></td>
+              </tr>
+            
+              <tr>
+                <td>Equipment</td>
+                <td>2</td>
+                <td><p>武器&amp;装备</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="proto.ItemUpdate.UpdateType">ItemUpdate.UpdateType</h3>
+        <p></p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>ADD</td>
+                <td>0</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>DELETE</td>
+                <td>1</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>UPDATE</td>
+                <td>2</td>
+                <td><p></p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="proto.PropertyUpdate.Prop">PropertyUpdate.Prop</h3>
+        <p></p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>HP</td>
+                <td>0</td>
+                <td><p>生命</p></td>
+              </tr>
+            
+              <tr>
+                <td>MP</td>
+                <td>1</td>
+                <td><p>法力</p></td>
+              </tr>
+            
+              <tr>
+                <td>HPMax</td>
+                <td>2</td>
+                <td><p>生命上限</p></td>
+              </tr>
+            
+              <tr>
+                <td>MPMax</td>
+                <td>3</td>
+                <td><p>法力上限</p></td>
+              </tr>
+            
+              <tr>
+                <td>State</td>
+                <td>4</td>
+                <td><p>状态</p></td>
+              </tr>
+            
+              <tr>
+                <td>Level</td>
+                <td>5</td>
+                <td><p>等级</p></td>
+              </tr>
+            
+              <tr>
+                <td>Name</td>
+                <td>6</td>
+                <td><p>名字</p></td>
+              </tr>
+            
+              <tr>
+                <td>Golds</td>
+                <td>7</td>
+                <td><p>金币</p></td>
+              </tr>
+            
+              <tr>
+                <td>Exp</td>
+                <td>8</td>
+                <td><p>经验</p></td>
+              </tr>
+            
+              <tr>
+                <td>Energy</td>
+                <td>9</td>
+                <td><p>活力</p></td>
+              </tr>
+            
+              <tr>
+                <td>Speed</td>
+                <td>10</td>
+                <td><p>移动速度</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="proto.Quality">Quality</h3>
+        <p>品质</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>Common</td>
+                <td>0</td>
+                <td><p>普通</p></td>
+              </tr>
+            
+              <tr>
+                <td>Fine</td>
+                <td>1</td>
+                <td><p>非凡</p></td>
+              </tr>
+            
+              <tr>
+                <td>Rare</td>
+                <td>2</td>
+                <td><p>稀有</p></td>
+              </tr>
+            
+              <tr>
+                <td>Epic</td>
+                <td>3</td>
+                <td><p>史诗</p></td>
+              </tr>
+            
+              <tr>
+                <td>Legendary</td>
+                <td>4</td>
+                <td><p>传说</p></td>
+              </tr>
+            
+              <tr>
+                <td>Artifact</td>
+                <td>5</td>
+                <td><p>神器</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="proto.UnitState">UnitState</h3>
+        <p></p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>FREE</td>
+                <td>0</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>DEAD</td>
+                <td>1</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>REST</td>
+                <td>2</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>FIGHT</td>
+                <td>3</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>MAX</td>
+                <td>4</td>
+                <td><p></p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+
+      
+
+      
+    
+
+    <h2 id="scalar-value-types">Scalar Value Types</h2>
+    <table class="scalar-value-types-table">
+      <thead>
+        <tr><td>.proto Type</td><td>Notes</td><td>C++</td><td>Java</td><td>Python</td><td>Go</td><td>C#</td><td>PHP</td><td>Ruby</td></tr>
+      </thead>
+      <tbody>
+        
+          <tr id="double">
+            <td>double</td>
+            <td></td>
+            <td>double</td>
+            <td>double</td>
+            <td>float</td>
+            <td>float64</td>
+            <td>double</td>
+            <td>float</td>
+            <td>Float</td>
+          </tr>
+        
+          <tr id="float">
+            <td>float</td>
+            <td></td>
+            <td>float</td>
+            <td>float</td>
+            <td>float</td>
+            <td>float32</td>
+            <td>float</td>
+            <td>float</td>
+            <td>Float</td>
+          </tr>
+        
+          <tr id="int32">
+            <td>int32</td>
+            <td>Uses variable-length encoding. Inefficient for encoding negative numbers – if your field is likely to have negative values, use sint32 instead.</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>int</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>integer</td>
+            <td>Bignum or Fixnum (as required)</td>
+          </tr>
+        
+          <tr id="int64">
+            <td>int64</td>
+            <td>Uses variable-length encoding. Inefficient for encoding negative numbers – if your field is likely to have negative values, use sint64 instead.</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>int/long</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>integer/string</td>
+            <td>Bignum</td>
+          </tr>
+        
+          <tr id="uint32">
+            <td>uint32</td>
+            <td>Uses variable-length encoding.</td>
+            <td>uint32</td>
+            <td>int</td>
+            <td>int/long</td>
+            <td>uint32</td>
+            <td>uint</td>
+            <td>integer</td>
+            <td>Bignum or Fixnum (as required)</td>
+          </tr>
+        
+          <tr id="uint64">
+            <td>uint64</td>
+            <td>Uses variable-length encoding.</td>
+            <td>uint64</td>
+            <td>long</td>
+            <td>int/long</td>
+            <td>uint64</td>
+            <td>ulong</td>
+            <td>integer/string</td>
+            <td>Bignum or Fixnum (as required)</td>
+          </tr>
+        
+          <tr id="sint32">
+            <td>sint32</td>
+            <td>Uses variable-length encoding. Signed int value. These more efficiently encode negative numbers than regular int32s.</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>int</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>integer</td>
+            <td>Bignum or Fixnum (as required)</td>
+          </tr>
+        
+          <tr id="sint64">
+            <td>sint64</td>
+            <td>Uses variable-length encoding. Signed int value. These more efficiently encode negative numbers than regular int64s.</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>int/long</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>integer/string</td>
+            <td>Bignum</td>
+          </tr>
+        
+          <tr id="fixed32">
+            <td>fixed32</td>
+            <td>Always four bytes. More efficient than uint32 if values are often greater than 2^28.</td>
+            <td>uint32</td>
+            <td>int</td>
+            <td>int</td>
+            <td>uint32</td>
+            <td>uint</td>
+            <td>integer</td>
+            <td>Bignum or Fixnum (as required)</td>
+          </tr>
+        
+          <tr id="fixed64">
+            <td>fixed64</td>
+            <td>Always eight bytes. More efficient than uint64 if values are often greater than 2^56.</td>
+            <td>uint64</td>
+            <td>long</td>
+            <td>int/long</td>
+            <td>uint64</td>
+            <td>ulong</td>
+            <td>integer/string</td>
+            <td>Bignum</td>
+          </tr>
+        
+          <tr id="sfixed32">
+            <td>sfixed32</td>
+            <td>Always four bytes.</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>int</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>integer</td>
+            <td>Bignum or Fixnum (as required)</td>
+          </tr>
+        
+          <tr id="sfixed64">
+            <td>sfixed64</td>
+            <td>Always eight bytes.</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>int/long</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>integer/string</td>
+            <td>Bignum</td>
+          </tr>
+        
+          <tr id="bool">
+            <td>bool</td>
+            <td></td>
+            <td>bool</td>
+            <td>boolean</td>
+            <td>boolean</td>
+            <td>bool</td>
+            <td>bool</td>
+            <td>boolean</td>
+            <td>TrueClass/FalseClass</td>
+          </tr>
+        
+          <tr id="string">
+            <td>string</td>
+            <td>A string must always contain UTF-8 encoded or 7-bit ASCII text.</td>
+            <td>string</td>
+            <td>String</td>
+            <td>str/unicode</td>
+            <td>string</td>
+            <td>string</td>
+            <td>string</td>
+            <td>String (UTF-8)</td>
+          </tr>
+        
+          <tr id="bytes">
+            <td>bytes</td>
+            <td>May contain any arbitrary sequence of bytes.</td>
+            <td>string</td>
+            <td>ByteString</td>
+            <td>str</td>
+            <td>[]byte</td>
+            <td>ByteString</td>
+            <td>string</td>
+            <td>String (ASCII-8BIT)</td>
+          </tr>
+        
+      </tbody>
+    </table>
+  </body>
+</html>
+

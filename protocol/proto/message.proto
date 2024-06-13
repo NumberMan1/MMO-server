@@ -1,0 +1,419 @@
+syntax = "proto3";
+
+package proto;
+option go_package = "./proto";
+
+message HeartBeatRequest{
+}
+message HeartBeatResponse{
+}
+
+//物品类型
+enum ItemType{
+	Material=0;       //材料&道具
+	Consumable=1;     //消耗品
+	Equipment=2;      //武器&装备
+}
+//品质
+enum Quality {
+	Common=0;     // 普通
+	Fine=1;   // 非凡
+	Rare=2;       // 稀有
+	Epic=3;       // 史诗
+	Legendary=4;  // 传说
+	Artifact=5;   // 神器
+}
+//装备类型
+enum EquipsType{
+	UNSET = 0;      // 无
+	Weapon = 1;    // 武器
+	Chest = 2;     // 胸甲
+	Belt = 4;      // 腰带
+	Legs = 5;      // 裤子
+	Boots = 6;     // 鞋子
+	Ring = 7;      // 戒指
+	Neck = 8;      // 项链
+	Wings = 10;    // 翅膀
+}
+
+
+enum EntityType
+{
+	Character = 0;
+	Monster = 1;
+	NPC = 2;
+	Item = 3;
+	Gate = 4;
+}
+
+// 用于网络传输的三维向量
+message Vec3 {
+	int32 x = 1;
+	int32 y = 2;
+	int32 z = 3;
+}
+// 实体状态
+enum EntityState {
+	NONE = 0;
+	IDLE = 1;
+	MOVE = 2;
+	JUMP = 3;
+}
+
+enum UnitState{
+	FREE	= 0;
+	DEAD	= 1;
+	REST	= 2;
+	FIGHT	= 3;
+	MAX		= 4;
+}
+
+//buff类型
+enum BuffType{
+	None = 0;
+	Buff = 1;	//正增益
+	Debuff = 2;	//负增益
+}
+//buff叠加方式
+enum BuffConflict {
+	Combine = 0;		//合并为一个buff，叠层（提高等级）
+	Separate = 1;		//独立存在
+	Cover = 2;		//覆盖，后者覆盖前者
+}
+
+
+
+// 实体信息
+message NetEntity {
+	int32 id = 1;
+	Vec3 position = 2;
+	Vec3 direction = 3;
+	int32 speed = 4;
+}
+// 角色信息
+message NetActor{
+	int32 id = 1;
+	int32 tid = 2; //单位类型=职业=TID
+	string name = 4;
+	int32 level = 5;
+	int64 exp = 6;
+	int32 spaceId = 7;
+	int64 gold = 8;
+	NetEntity entity = 9;
+	float hp = 10;
+	float mp = 11;
+	EntityType type = 12;
+	repeated SkillInfo Skills = 13;
+	//InventoryInfo equipsData = 16;
+	ItemInfo itemInfo = 17;		//物品实体专用属性
+	float hpmax = 18;	//生命上限
+	float mpmax = 19;	//法力上限
+	repeated ItemInfo equipsList = 20; //穿戴装备
+}
+
+//角色装备发给客户端
+message EquipsResponse{
+	int32 entityId = 1;
+	repeated ItemInfo equipsList = 2; //穿戴装备
+}
+
+
+message PropertyUpdate {
+	enum Prop {
+		HP = 0;			//生命
+		MP = 1;			//法力
+		HPMax = 2;		//生命上限
+		MPMax = 3;		//法力上限
+		State = 4;		//状态
+		Level = 5;		//等级
+		Name = 6;		//名字
+		Golds = 7;		//金币
+		Exp = 8;		//经验
+		Energy = 9;		//活力
+		Speed = 10;		//移动速度
+		//幸运、罪恶、技能点
+	}
+
+	message PropertyValue {
+		oneof value {
+			int32 int_value = 1; //21亿
+			float float_value = 2;
+			string string_value = 3;
+			UnitState state_value = 4;
+			int64 long_value = 5;
+		}
+	}
+
+	int32 entity_id = 1;
+	Prop property = 2;
+	PropertyValue oldValue = 3;
+	PropertyValue newValue = 4;
+}
+message PropertyUpdateResponse{
+	repeated PropertyUpdate list = 1;
+}
+
+
+
+//伤害类型
+enum DamageType {
+	UNKNOWN = 0; 	// 默认值，表示未知或未设置
+	PHYSICAL = 1; 	// 物理伤害
+	MAGICAL = 2; 	// 魔法伤害
+	REAL = 3; 		// 真实伤害，通常不受任何防御属性影响
+}
+//伤害数据
+message Damage{
+	int32 attackerId = 1;		// 攻击者
+	int32 targetId = 2;			// 被攻击者
+	int32 skillId = 3;			// 技能
+	float amount = 4;			// 伤害数值
+	DamageType damageType = 5;	// 伤害类型
+	bool isCrit = 6;			// 是否暴击
+	bool isMiss = 7; 			// 是否miss
+}
+//通知客户端有人受到伤害
+message DamageResponse{
+	repeated Damage list = 1;
+}
+
+
+//聊天请求
+message ChatRequest{
+	string text_value = 1;		//消息文本
+}
+//聊天响应
+message ChatResponse {
+	int32 sender_id = 1;		//发送者entityID
+	string text_value = 2;		//消息文本
+}
+
+
+// 技能信息
+message SkillInfo{
+	int32 id = 1; 	//技能ID
+}
+//施法信息
+message CastInfo{
+	int32 casterId = 1; 	//施法者id
+	int32 skillId = 2;		//技能id
+	int32 targetId = 3;		//技能施放单位
+	Vec3 targetLoc = 4;		//技能施放点
+}
+//施放请求
+message SpellRequest{
+	CastInfo info = 1;
+}
+//技能施放结果
+enum CastResult{
+	Success			= 0;		//成功
+	IsPassive   	= 1;		//被动技能
+	MpLack 			= 2;		//MP不足
+	EntityDead 		= 3;  		//Entity已经死亡
+	OutOfRange 		= 5;     	//超出范围
+	Running 		= 6;        //进行中
+	Cooldown 		= 7;      	//冷却中
+	TargetError		= 8;		//目标错误
+}
+//技能施放错误（只有施法玩家才会收到）
+message SpellFailResponse{
+	int32 casterId = 1; 		//施法者id
+	int32 skillId = 2;			//技能id
+	CastResult reason = 3;  	//失败原因
+}
+//通知客户端执行技能
+message SpellResponse{
+	repeated CastInfo castList = 1;
+}
+
+//请求复活
+message ReviveRequest{
+	int32 entityId = 1;
+}
+
+//角色进入场景
+message SpaceEnterResponse{
+	NetActor character = 1;
+	repeated NetActor list = 2;
+}
+
+
+
+message NetEntitySync{
+	NetEntity entity = 1;
+	EntityState state = 2;
+	bool force = 3;
+}
+
+message SpaceEntitySyncRequest{
+	NetEntitySync entitySync = 1;
+}
+message SpaceEntitySyncResponse{
+	NetEntitySync entitySync = 1;
+}
+
+message GameEnterRequest{
+	int32 characterId = 1;
+}
+//加入游戏的响应
+message GameEnterResponse{
+	bool success = 1;
+	NetEntity entity = 2;
+	NetActor character = 3;
+}
+
+message SpaceCharactersEnterResponse{
+	int32 spaceId = 1;
+	repeated NetActor characterList = 2;
+}
+
+message SpaceCharacterLeaveResponse{
+	int32 entityId = 1;
+}
+
+
+message UserRegisterRequest{
+	string username = 1;
+	string password = 2;
+}
+message UserRegisterResponse{
+	int32 code = 1;
+	string message = 2;
+}
+
+
+message UserLoginRequest{
+	string username = 1;
+	string password = 2;
+}
+message UserLoginResponse{
+	bool success = 3;
+	int32 code = 1;
+	string message = 2;
+	string sessionId = 4;
+}
+message EntitySyncResponse {
+	repeated NetEntity entityList = 1;
+}
+message EntityEnterResponse {
+	NetEntity entity = 1;
+}
+
+message CharacterCreateRequest{
+	string name = 1;
+	int32 jobType = 2;
+}
+
+// 创建角色的响应
+message ChracterCreateResponse{
+	bool success = 1;
+	string message = 2;
+	NetActor character = 3;
+}
+
+// 查询角色列表的请求
+message CharacterListRequest{
+}
+// 角色列表的响应
+message CharacterListResponse{
+	repeated NetActor characterList = 1;
+}
+// 删除角色的请求
+message CharacterDeleteRequest{
+	int32 characterId = 1;
+}
+// 删除角色的响应
+message CharacterDeleteResponse{
+	bool success = 1;
+	string message = 2;
+}
+
+
+//装备数据
+message EquipData{
+	//打孔、镶嵌、宝石、强化
+}
+
+// 物品信息
+message ItemInfo{
+	int32 itemId = 1;		//物品ID
+	int32 amount = 2;		//物品数量
+	int32 position = 3;		//所处位置
+	EquipData EquipData = 4; 		//装备信息，拥有此属性代表这是装备
+}
+// 物品更新
+message ItemUpdate{
+	enum UpdateType {
+		ADD = 0;
+		DELETE = 1;
+		UPDATE = 2;
+	}
+	UpdateType type = 1;
+	ItemInfo item = 2;
+}
+//库存对象
+message InventoryInfo{
+	int32 capacity = 1;	//格子数量
+	repeated ItemInfo list = 2;
+}
+//拾取物品的请求
+message PickupItemRequest{
+	int32 entityId = 1; //物品实体的entityId
+}
+//查询背包信息
+message InventoryRequest{
+	int32 entityId = 1;
+	bool queryKnapsack = 2;		//是否查询背包
+	bool queryWarehouse = 3;	//是否查询仓库
+	bool queryEquipment = 4;	//是否查询装备栏
+}
+//角色的背包信息
+message InventoryResponse{
+	int32 entityId = 1;
+	InventoryInfo knapsackInfo = 2;
+	InventoryInfo warehouseInfo = 3;
+	InventoryInfo equipmentInfo = 4;
+}
+//物品放置请求
+message ItemPlacementRequest {
+	int32 entityId = 1;
+	int32 originIndex = 2;	//原始索引
+	int32 targetIndex = 3;	//目标索引
+}
+//丢弃的物品的请求
+message ItemDiscardRequest{
+	int32 entityId = 1;
+	int32 slotIndex = 2;	//插槽索引
+	int32 count = 3;		//丢弃数量
+}
+//使用物品的请求
+message ItemUseRequest{
+	int32 entityId = 1;		//使用物品的人
+	int32 slotIndex = 2;	//使用哪个插槽的物品
+}
+//穿戴装备
+message ItemAttachRequest{
+	int32 entityId = 1;		//穿装备的人
+	int32 slotIndex = 2;	//背包里的插槽位置
+}
+//脱下装备
+message ItemDetachRequest{
+	int32 entityId = 1;
+	EquipsType equipsType = 2;	//装备类型
+}
+
+
+
+//重连请求
+message ReconnectRequest{
+	string sessionId = 1;
+}
+//重连结果
+message ReconnectResponse{
+	bool success = 1;	//是否重连成功
+	int32 entityId = 2;	//重连的角色，0代表未选择角色
+}
+//请求退出游戏
+message ExitRequest{ }
+//通知客户端退出游戏
+message ExitResponse{ }

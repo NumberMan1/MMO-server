@@ -1,11 +1,11 @@
 package model
 
 import (
+	"github.com/NumberMan1/MMO-server/core"
 	"github.com/NumberMan1/MMO-server/core/vector3"
+	"github.com/NumberMan1/MMO-server/protocol/gen/proto"
 	"github.com/NumberMan1/common/summer"
-	"github.com/NumberMan1/common/summer/protocol/gen/proto"
 	"github.com/NumberMan1/common/summer/timeunit"
-	"math"
 	"math/rand"
 )
 
@@ -58,7 +58,7 @@ func (m *Monster) MoveTo(target *vector3.Vector3) {
 		m.MoveTarget = target
 		m.MovePosition = m.Position()
 		dir := vector3.Normalize3(vector3.Sub3(m.MoveTarget, m.MovePosition))
-		m.SetDirection(vector3.Dot(m.LookRotation(dir), y1000))
+		m.SetDirection(vector3.Dot(core.LookRotation(dir), y1000))
 		//广播消息
 		es := &proto.NetEntitySync{
 			Entity: m.EntityData(),
@@ -90,7 +90,7 @@ func (m *Monster) Update() {
 	if m.State() == proto.EntityState_MOVE {
 		//移动方向
 		dir := vector3.Normalize3(vector3.Sub3(m.MoveTarget, m.MovePosition))
-		m.SetDirection(vector3.Dot(m.LookRotation(dir), y1000))
+		m.SetDirection(vector3.Dot(core.LookRotation(dir), y1000))
 		//logger.SLCDebug("-----------------")
 		//logger.SLCDebug("%d speed %v", m.EntityId(), m.Speed())
 		//logger.SLCDebug("-----------------")
@@ -103,27 +103,6 @@ func (m *Monster) Update() {
 		}
 		m.SetPosition(m.MovePosition)
 	}
-}
-
-// LookRotation 方向向量转欧拉角
-func (m *Monster) LookRotation(fromDir *vector3.Vector3) *vector3.Vector3 {
-	rad2Deg := 57.29578
-	eulerAngles := vector3.NewVector3(0, 0, 0)
-	eulerAngles.X = math.Acos(math.Sqrt((fromDir.X*fromDir.X+fromDir.Z*fromDir.Z)/(fromDir.X*fromDir.X+fromDir.Y*fromDir.Y+fromDir.Z*fromDir.Z))) * rad2Deg
-	if fromDir.Y > 0 {
-		eulerAngles.X = 360 - eulerAngles.X
-	}
-	//AngleY = arc tan(x/z)
-	eulerAngles.Y = math.Atan2(fromDir.X, fromDir.Z) * rad2Deg
-	if eulerAngles.Y < 0 {
-		eulerAngles.Y += 180
-	}
-	if fromDir.X < 0 {
-		eulerAngles.Y += 180
-	}
-	//AngleZ = 0
-	eulerAngles.Z = 0
-	return eulerAngles
 }
 
 // RandomPointWithBirth 计算出生点附近的随机坐标

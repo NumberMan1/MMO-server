@@ -1,21 +1,22 @@
 package model
 
 import (
+	define2 "github.com/NumberMan1/MMO-server/config/define"
 	"github.com/NumberMan1/MMO-server/core/vector3"
-	"github.com/NumberMan1/MMO-server/define"
 	"github.com/NumberMan1/MMO-server/inventory/item"
+	"github.com/NumberMan1/MMO-server/mgr"
 	"github.com/NumberMan1/MMO-server/model/entity"
+	"github.com/NumberMan1/MMO-server/protocol/gen/proto"
 	"github.com/NumberMan1/common/logger"
 	"github.com/NumberMan1/common/ns"
 	"github.com/NumberMan1/common/summer/core"
-	"github.com/NumberMan1/common/summer/protocol/gen/proto"
 )
 
 type Actor struct {
 	*entity.Entity
 	space     *Space
 	info      *proto.NetActor
-	define    *define.UnitDefine
+	define    *define2.UnitDefine
 	state     proto.EntityState
 	attr      *AttributesAssembly
 	unitState proto.UnitState
@@ -24,7 +25,7 @@ type Actor struct {
 }
 
 func (a *Actor) Level() int {
-	return int(a.Info().Exp)
+	return int(a.Info().Level)
 }
 
 func (a *Actor) Exp() int {
@@ -86,7 +87,7 @@ func NewActor(t proto.EntityType, tid, level int, position, direction *vector3.V
 		attr: NewAttributesAssembly(),
 	}
 	a.Info().Entity = a.EntityData()
-	if def, ok := define.GetDataManagerInstance().Units[tid]; ok {
+	if def, ok := define2.GetDataManagerInstance().Units[tid]; ok {
 		a.define = def
 		a.Info().Name = a.define.Name
 		a.Info().Hp = a.define.HPMax
@@ -150,11 +151,11 @@ func (a *Actor) SetInfo(info *proto.NetActor) {
 	a.info = info
 }
 
-func (a *Actor) Define() *define.UnitDefine {
+func (a *Actor) Define() *define2.UnitDefine {
 	return a.define
 }
 
-func (a *Actor) SetDefine(define *define.UnitDefine) {
+func (a *Actor) SetDefine(define *define2.UnitDefine) {
 	a.define = define
 }
 
@@ -172,7 +173,7 @@ func (a *Actor) IsDeath() bool {
 
 func (a *Actor) OnEnterSpace(space *Space, chr IActor) {
 	if a.space != nil && space != nil {
-		GetEntityManagerInstance().ChangeSpace(a, a.Space().Id, space.Id)
+		mgr.GetEntityManagerInstance().ChangeSpace(a, a.Space().Id, space.Id)
 	}
 	a.space = space
 	a.info.SpaceId = int32(space.Id)
@@ -415,8 +416,8 @@ func (a *Actor) SetAndUpdateLevel(value int) {
 	a.Space().FightMgr.PropertyUpdateQueue.Push(rsp)
 }
 
-// OnHpMaxChanged 通知客户端：HPMax变化
-func (a *Actor) OnHpMaxChanged(value float32) {
+// SyncHpMax 通知客户端：HPMax变化
+func (a *Actor) SyncHpMax(value float32) {
 	a.Info().Hpmax = value
 	po := &proto.PropertyUpdate{
 		EntityId: int32(a.EntityId()),
@@ -439,8 +440,8 @@ func (a *Actor) OnHpMaxChanged(value float32) {
 	}
 }
 
-// OnMpMaxChanged 通知客户端：MPMax变化
-func (a *Actor) OnMpMaxChanged(value float32) {
+// SyncMpMax 通知客户端：MPMax变化
+func (a *Actor) SyncMpMax(value float32) {
 	a.Info().Mpmax = value
 	po := &proto.PropertyUpdate{
 		EntityId: int32(a.EntityId()),

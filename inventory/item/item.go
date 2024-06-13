@@ -1,8 +1,8 @@
 package item
 
 import (
-	"github.com/NumberMan1/MMO-server/define"
-	"github.com/NumberMan1/common/summer/protocol/gen/proto"
+	define2 "github.com/NumberMan1/MMO-server/config/define"
+	"github.com/NumberMan1/MMO-server/protocol/gen/proto"
 )
 
 type ItemType int
@@ -35,7 +35,7 @@ type Item struct {
 	buyPrice     int
 	sellingPrice int
 	sprite       string //存放物品的图片路径，通过Resources加载
-	def          *define.ItemDefine
+	def          *define2.ItemDefine
 	Amount       int //数量
 	Position     int //所处位置
 	itemInfo     *proto.ItemInfo
@@ -50,7 +50,7 @@ func (i *Item) ItemInfo() *proto.ItemInfo {
 	return i.itemInfo
 }
 
-func NewItem(def *define.ItemDefine, amount, position int) *Item {
+func NewItem(def *define2.ItemDefine, amount, position int) *Item {
 	i := &Item{def: def, Amount: amount, Position: position}
 	i.SetId(def.GetId())
 	i.SetName(def.Name)
@@ -85,11 +85,11 @@ func NewItem(def *define.ItemDefine, amount, position int) *Item {
 }
 
 func NewItemByItemId(itemId, amount, position int) *Item {
-	def := define.GetDataManagerInstance().Items[itemId]
+	def := define2.GetDataManagerInstance().Items[itemId]
 	return NewItem(def, amount, position)
 }
 
-func (i *Item) Def() *define.ItemDefine {
+func (i *Item) Def() *define2.ItemDefine {
 	return i.def
 }
 

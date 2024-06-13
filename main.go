@@ -1,9 +1,11 @@
 package main
 
 import (
+	"github.com/NumberMan1/MMO-server/bootstrap"
+	"github.com/NumberMan1/MMO-server/config/define"
 	"github.com/NumberMan1/MMO-server/core/vector3"
-	"github.com/NumberMan1/MMO-server/define"
 	"github.com/NumberMan1/MMO-server/inventory/item"
+	"github.com/NumberMan1/MMO-server/mgr"
 	"github.com/NumberMan1/MMO-server/model"
 	"github.com/NumberMan1/MMO-server/service"
 	"github.com/NumberMan1/common/logger"
@@ -12,6 +14,7 @@ import (
 )
 
 func initServices() {
+	bootstrap.Init("config/config.yaml")
 	//加载JSON配置文件
 	define.GetDataManagerInstance().Init()
 	//网路服务模块
@@ -34,7 +37,7 @@ func initServices() {
 	//mon.AI = model.NewMonsterAI(mon)
 
 	summer.GetScheduleInstance().AddTask(func() {
-		model.GetEntityManagerInstance().Update()
+		mgr.GetEntityManagerInstance().Update()
 		model.GetSpaceManagerInstance().Update()
 	}, timeunit.Milliseconds, 20, 0)
 

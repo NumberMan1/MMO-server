@@ -3,11 +3,14 @@ package model
 import (
 	"github.com/NumberMan1/MMO-server/core/vector3"
 	"github.com/NumberMan1/MMO-server/inventory/item"
-	"github.com/NumberMan1/common/summer/protocol/gen/proto"
+	"github.com/NumberMan1/MMO-server/mgr"
+	"github.com/NumberMan1/MMO-server/protocol/gen/proto"
 )
 
+// ItemEntity 场景里的物品
 type ItemEntity struct {
 	*Actor
+	//真正的物品对象
 	item *item.Item
 }
 
@@ -16,7 +19,7 @@ func CreateItemEntity(space *Space, item1 *item.Item, pos, dir *vector3.Vector3)
 	entity := NewItemEntity(proto.EntityType_Item, 0, 0, pos, dir)
 	entity.SetItem(item1)
 	entity.Info().ItemInfo = entity.Item().ItemInfo()
-	GetEntityManagerInstance().AddEntity(space.Id, entity)
+	mgr.GetEntityManagerInstance().AddEntity(space.Id, entity)
 	space.EntityEnter(entity)
 	return entity
 }

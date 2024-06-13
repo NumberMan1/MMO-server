@@ -1,10 +1,10 @@
 package model
 
 import (
+	"github.com/NumberMan1/MMO-server/config/define"
 	"github.com/NumberMan1/MMO-server/core/vector3"
-	"github.com/NumberMan1/MMO-server/define"
 	"github.com/NumberMan1/MMO-server/model/entity"
-	"github.com/NumberMan1/common/summer/protocol/gen/proto"
+	"github.com/NumberMan1/MMO-server/protocol/gen/proto"
 )
 
 type IActor interface {
@@ -53,6 +53,6 @@ type IActor interface {
 	SetAndUpdateGolds(value int64)
 	SetAndUpdateExp(value int64)
 	SetAndUpdateLevel(value int)
-	OnHpMaxChanged(value float32)
-	OnMpMaxChanged(value float32)
+	SyncHpMax(value float32)
+	SyncMpMax(value float32)
 }

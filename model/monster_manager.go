@@ -2,6 +2,7 @@ package model
 
 import (
 	"github.com/NumberMan1/MMO-server/core/vector3"
+	"github.com/NumberMan1/MMO-server/mgr"
 )
 
 // MonsterManager 每个地图都有怪物管理器
@@ -21,7 +22,7 @@ func (mm *MonsterManager) Init(space *Space) {
 
 func (mm *MonsterManager) Create(tid, level int, pos, dir *vector3.Vector3) *Monster {
 	monster := NewMonster(tid, level, pos, dir)
-	GetEntityManagerInstance().AddEntity(mm.space.Id, monster)
+	mgr.GetEntityManagerInstance().AddEntity(mm.space.Id, monster)
 	monster.Info().SpaceId = int32(mm.space.Id)
 	monster.Info().GetEntity().Id = int32(monster.EntityId())
 	mm.dict[monster.EntityId()] = monster

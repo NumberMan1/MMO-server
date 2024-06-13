@@ -2,11 +2,13 @@ package service
 
 import (
 	"github.com/NumberMan1/MMO-server/core/vector3"
+	"github.com/NumberMan1/MMO-server/mgr"
 	"github.com/NumberMan1/MMO-server/model"
+	"github.com/NumberMan1/MMO-server/protocol/gen/proto"
 	"github.com/NumberMan1/common/logger"
 	"github.com/NumberMan1/common/ns/singleton"
 	"github.com/NumberMan1/common/summer/network"
-	"github.com/NumberMan1/common/summer/protocol/gen/proto"
+	"github.com/NumberMan1/common/summer/network/message_router"
 	"math"
 )
 
@@ -29,16 +31,16 @@ func (ss *SpaceService) Start() {
 	//初始化地图
 	model.GetSpaceManagerInstance().Init()
 	//位置同步请求
-	network.GetMessageRouterInstance().Subscribe("proto.SpaceEntitySyncRequest", network.MessageHandler{Op: ss.spaceEntitySyncRequest})
+	network.GetMessageRouterInstance().Subscribe("proto.SpaceEntitySyncRequest", message_router.MessageHandler{Op: ss.spaceEntitySyncRequest})
 }
 
 func (ss *SpaceService) GetSpace(id int) *model.Space {
 	return model.GetSpaceManagerInstance().GetSpace(id)
 }
 
-func (ss *SpaceService) spaceEntitySyncRequest(msg network.Msg) {
+func (ss *SpaceService) spaceEntitySyncRequest(msg message_router.Msg) {
 	//获取当前角色所在的地图
-	sp := msg.Sender.Get("Session").(*model.Session).Space()
+	sp := msg.Sender.(network.Connection).Get("Session").(*model.Session).Space()
 	if sp == nil {
 		return
 	}
@@ -46,7 +48,7 @@ func (ss *SpaceService) spaceEntitySyncRequest(msg network.Msg) {
 	netEntity := msg.Message.(*proto.SpaceEntitySyncRequest).EntitySync.Entity
 	netV3 := vector3.NewVector3(float64(netEntity.Position.X), float64(netEntity.Position.Y), float64(netEntity.Position.Z))
 	//服务端实际的角色信息
-	serEntity := model.GetEntityManagerInstance().GetEntity(int(netEntity.Id))
+	serEntity := mgr.GetEntityManagerInstance().GetEntity(int(netEntity.Id))
 	serV3 := vector3.NewVector3(serEntity.Position().X, serEntity.Position().Y, serEntity.Position().Z)
 	//计算距离
 	distance := vector3.GetDistance(netV3, serV3)
@@ -65,7 +67,7 @@ func (ss *SpaceService) spaceEntitySyncRequest(msg network.Msg) {
 				Force:  true,
 			},
 		}
-		msg.Sender.Send(resp)
+		msg.Sender.(network.Connection).Send(resp)
 		return
 	}
 

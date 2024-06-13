@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package proto;
+option go_package = "./proto";
+
+message Rpc {
+  int32 id = 1;
+  string name = 2;
+  int32 target = 3;
+  bytes args = 4;
+}

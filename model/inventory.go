@@ -1,12 +1,12 @@
 package model
 
 import (
+	"github.com/NumberMan1/MMO-server/config/define"
 	"github.com/NumberMan1/MMO-server/core/vector3"
-	"github.com/NumberMan1/MMO-server/define"
 	"github.com/NumberMan1/MMO-server/inventory/item"
+	"github.com/NumberMan1/MMO-server/protocol/gen/proto"
 	"github.com/NumberMan1/common/logger"
 	"github.com/NumberMan1/common/summer/proto_helper"
-	"github.com/NumberMan1/common/summer/protocol/gen/proto"
 	"sync"
 )
 

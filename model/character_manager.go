@@ -2,6 +2,8 @@ package model
 
 import (
 	"github.com/NumberMan1/MMO-server/database"
+	"github.com/NumberMan1/MMO-server/mgr"
+	"github.com/NumberMan1/common/global/variable"
 	"github.com/NumberMan1/common/ns/singleton"
 	"github.com/NumberMan1/common/summer"
 	"github.com/NumberMan1/common/summer/timeunit"
@@ -37,7 +39,7 @@ func GetCharacterManagerInstance() *CharacterManager {
 func (cm *CharacterManager) CreateCharacter(dbChr *database.DbCharacter) *Character {
 	character := NewCharacter(dbChr)
 	cm.characters.Store(character.Id(), character)
-	GetEntityManagerInstance().AddEntity(dbChr.SpaceId, character)
+	mgr.GetEntityManagerInstance().AddEntity(dbChr.SpaceId, character)
 	return character
 }
 
@@ -46,7 +48,7 @@ func (cm *CharacterManager) RemoveCharacter(chrId int) {
 	if ok {
 		cm.characters.Delete(chrId)
 		chr := character.(*Character)
-		GetEntityManagerInstance().RemoveEntity(chr.Data.SpaceId, chr)
+		mgr.GetEntityManagerInstance().RemoveEntity(chr.Data.SpaceId, chr)
 	}
 }
 
@@ -78,7 +80,7 @@ func (cm *CharacterManager) save() {
 		chr.Data.Gold = chr.Info().Gold
 		bs, _ := proto.Marshal(chr.Knapsack.InventoryInfo())
 		chr.Data.Knapsack = bs
-		database.OrmDb.Save(chr.Data)
+		variable.GDb.Save(chr.Data)
 		return true
 	})
 }

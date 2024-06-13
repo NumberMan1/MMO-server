@@ -1,5 +1,8 @@
 package fight
 
+import "encoding/json"
+
+// Attributes 定义实体的各种属性
 type Attributes struct {
 	Speed     float32 // 速度
 	HPMax     float32 // 最大生命值
@@ -15,66 +18,72 @@ type Attributes struct {
 	AGI       float32 // 敏捷
 	HitRate   float32 // 命中率
 	DodgeRate float32 // 闪避率
-	HpRegen   float32 //生命恢复
-	HpSteal   float32 //伤害吸血%
+	HpRegen   float32 // 生命恢复
+	HpSteal   float32 // 伤害吸血%
 }
 
-// Add 增加属性
-func (ad *Attributes) Add(data *Attributes) {
-	ad.Speed += data.Speed
-	ad.HPMax += data.HPMax
-	ad.MPMax += data.MPMax
-	ad.AD += data.AD
-	ad.AP += data.AP
-	ad.DEF += data.DEF
-	ad.MDEF += data.MDEF
-	ad.CRI += data.CRI
-	ad.CRD += data.CRD
-	ad.STR += data.STR
-	ad.INT += data.INT
-	ad.AGI += data.AGI
-	ad.HitRate += data.HitRate
-	ad.DodgeRate += data.DodgeRate
-	ad.HpRegen += data.HpRegen
-	ad.HpSteal += data.HpSteal
+// Add 方法增加来自另一个 Attributes 对象的属性
+func (a *Attributes) Add(data *Attributes) {
+	a.Speed += data.Speed
+	a.HPMax += data.HPMax
+	a.MPMax += data.MPMax
+	a.AD += data.AD
+	a.AP += data.AP
+	a.DEF += data.DEF
+	a.MDEF += data.MDEF
+	a.CRI += data.CRI
+	a.CRD += data.CRD
+	a.STR += data.STR
+	a.INT += data.INT
+	a.AGI += data.AGI
+	a.HitRate += data.HitRate
+	a.DodgeRate += data.DodgeRate
+	a.HpRegen += data.HpRegen
+	a.HpSteal += data.HpSteal
 }
 
-// Sub 减少属性
-func (ad *Attributes) Sub(data *Attributes) {
-	ad.Speed -= data.Speed
-	ad.HPMax -= data.HPMax
-	ad.MPMax -= data.MPMax
-	ad.AD -= data.AD
-	ad.AP -= data.AP
-	ad.DEF -= data.DEF
-	ad.MDEF -= data.MDEF
-	ad.CRI -= data.CRI
-	ad.CRD -= data.CRD
-	ad.STR -= data.STR
-	ad.INT -= data.INT
-	ad.AGI -= data.AGI
-	ad.HitRate -= data.HitRate
-	ad.DodgeRate -= data.DodgeRate
-	ad.HpRegen -= data.HpRegen
-	ad.HpSteal -= data.HpSteal
+// Sub 方法减少来自另一个 Attributes 对象的属性
+func (a *Attributes) Sub(data *Attributes) {
+	a.Speed -= data.Speed
+	a.HPMax -= data.HPMax
+	a.MPMax -= data.MPMax
+	a.AD -= data.AD
+	a.AP -= data.AP
+	a.DEF -= data.DEF
+	a.MDEF -= data.MDEF
+	a.CRI -= data.CRI
+	a.CRD -= data.CRD
+	a.STR -= data.STR
+	a.INT -= data.INT
+	a.AGI -= data.AGI
+	a.HitRate -= data.HitRate
+	a.DodgeRate -= data.DodgeRate
+	a.HpRegen -= data.HpRegen
+	a.HpSteal -= data.HpSteal
 }
 
-// Reset 重置属性
-func (ad *Attributes) Reset() {
-	ad.Speed = 0
-	ad.HPMax = 0
-	ad.MPMax = 0
-	ad.AD = 0
-	ad.AP = 0
-	ad.DEF = 0
-	ad.MDEF = 0
-	ad.CRI = 0
-	ad.CRD = 0
-	ad.STR = 0
-	ad.INT = 0
-	ad.AGI = 0
-	ad.HitRate = 0
-	ad.DodgeRate = 0
-	ad.HpRegen = 0
-	ad.HpSteal = 0
+// Reset 方法将所有属性重置为零
+func (a *Attributes) Reset() {
+	a.Speed = 0
+	a.HPMax = 0
+	a.MPMax = 0
+	a.AD = 0
+	a.AP = 0
+	a.DEF = 0
+	a.MDEF = 0
+	a.CRI = 0
+	a.CRD = 0
+	a.STR = 0
+	a.INT = 0
+	a.AGI = 0
+	a.HitRate = 0
+	a.DodgeRate = 0
+	a.HpRegen = 0
+	a.HpSteal = 0
+}
+
+// ToString 方法提供 Attributes 对象的 JSON 表示
+func (a *Attributes) ToString() string {
+	data, _ := json.Marshal(a)
+	return string(data)
 }

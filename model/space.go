@@ -1,10 +1,10 @@
 package model
 
 import (
+	"github.com/NumberMan1/MMO-server/config/define"
 	"github.com/NumberMan1/MMO-server/core/vector3"
-	"github.com/NumberMan1/MMO-server/define"
+	pt "github.com/NumberMan1/MMO-server/protocol/gen/proto"
 	"github.com/NumberMan1/common/logger"
-	pt "github.com/NumberMan1/common/summer/protocol/gen/proto"
 	"github.com/NumberMan1/common/summer/timeunit"
 	"google.golang.org/protobuf/proto"
 )

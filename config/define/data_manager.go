@@ -14,16 +14,21 @@ var (
 )
 
 type DataManager struct {
+	Buffs  map[int]*BuffDefine
 	Spaces map[int]*SpaceDefine
 	Units  map[int]*UnitDefine
 	Spawns map[int]*SpawnDefine
 	Skills map[int]*SkillDefine
 	Items  map[int]*ItemDefine
+	Levels map[int]*LevelDefine
 }
 
 // Init 从mongodb中读取地图,单位,刷怪,技能信息
 func (dm *DataManager) Init() {
 	ctx := context.TODO()
+	loadFromMongo[*BuffDefine](ctx, dm.Buffs, database.MongoDbClient, func() *BuffDefine {
+		return &BuffDefine{}
+	})
 	loadFromMongo[*SpaceDefine](ctx, dm.Spaces, database.MongoDbClient, func() *SpaceDefine {
 		return &SpaceDefine{}
 	})
@@ -38,6 +43,9 @@ func (dm *DataManager) Init() {
 	})
 	loadFromMongo[*ItemDefine](ctx, dm.Items, database.MongoDbClient, func() *ItemDefine {
 		return &ItemDefine{}
+	})
+	loadFromMongo[*LevelDefine](ctx, dm.Levels, database.MongoDbClient, func() *LevelDefine {
+		return &LevelDefine{}
 	})
 	//logger.SLCDebug("%v", *dm.Items[1002])
 }
@@ -63,11 +71,13 @@ func loadFromMongo[T IDefine](ctx context.Context, kv map[int]T, client *mongobr
 func GetDataManagerInstance() *DataManager {
 	result, _ := singleton.GetOrDo[*DataManager](&singleDataManager, func() (*DataManager, error) {
 		return &DataManager{
+			Buffs:  map[int]*BuffDefine{},
 			Spaces: map[int]*SpaceDefine{},
 			Units:  map[int]*UnitDefine{},
 			Spawns: map[int]*SpawnDefine{},
 			Skills: map[int]*SkillDefine{},
 			Items:  map[int]*ItemDefine{},
+			Levels: map[int]*LevelDefine{},
 		}, nil
 	})
 	return result

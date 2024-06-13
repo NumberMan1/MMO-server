@@ -6,45 +6,49 @@ import (
 	"github.com/NumberMan1/common"
 	"github.com/NumberMan1/common/logger"
 	mongobrocker "github.com/NumberMan1/common/mongo"
-	"github.com/NumberMan1/common/ormdb"
-	"gorm.io/gorm"
+	"gopkg.in/yaml.v3"
+	"os"
+	"strconv"
 )
 
-// 可配置的数据库参数
+// mongodb可配置的数据库
 var (
-	Host             string
-	Port             string
-	User             string
-	Password         string
-	OrmConnectionStr string
-	OrmDb            *gorm.DB
-	MongoDbClient    *mongobrocker.Client
+	MongoDbClient *mongobrocker.Client
 )
 
-func init() {
-	Host = "127.0.0.1"
-	Port = "3406"
-	User = "root"
-	Password = "root"
-	OrmConnectionStr = fmt.Sprintf("%s:%s@tcp(%s:%s)/game?charset=utf8&parseTime=True&loc=Local&timeout=1000ms", User, Password, Host, Port)
-	var err error
-	OrmDb, err = ormdb.ConnectToDB("mysql", OrmConnectionStr)
-	if err != nil {
-		logger.SLCError(err.Error())
-	}
-	err = OrmDb.AutoMigrate(&DbPlayer{})
-	if err != nil {
-		logger.SLCError(err.Error())
-	}
-	err = OrmDb.AutoMigrate(&DbCharacter{})
-	if err != nil {
-		logger.SLCError(err.Error())
-	}
+type sysConfig struct {
+	Mongodb struct {
+		Host        string `yaml:"host"`
+		Port        int    `yaml:"port"`
+		MinPoolSize int    `yaml:"min_pool_size"`
+		MaxPoolSize int    `yaml:"max_pool_size"`
+	} `yaml:"mongodb"`
+}
+
+func Init(configPath string) {
 	ctx := context.Background()
+	//读取yaml
+	file, _ := os.Open(configPath)
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			logger.SLoggerConsole.Error("Error closing")
+		}
+	}(file)
+	decoder := yaml.NewDecoder(file)
+	config := sysConfig{}
+	err := decoder.Decode(&config)
+	if err != nil {
+		fmt.Println("Error:", err)
+		panic("加载配置出错")
+	}
+	url := "mongodb://" + config.Mongodb.Host + ":" + strconv.FormatInt(int64(config.Mongodb.Port), 10)
+	fmt.Println(url)
+	//创建mongo客户端
 	MongoDbClient = &mongobrocker.Client{
 		BaseComponent: common.NewBaseComponent(),
 		RealCli: mongobrocker.NewClient(ctx, &mongobrocker.Config{
-			URI:         "mongodb://localhost:26017",
+			URI:         url,
 			MinPoolSize: 3,
 			MaxPoolSize: 3000,
 		}),

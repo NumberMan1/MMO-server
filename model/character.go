@@ -4,8 +4,8 @@ import (
 	"github.com/NumberMan1/MMO-server/core/vector3"
 	"github.com/NumberMan1/MMO-server/database"
 	"github.com/NumberMan1/MMO-server/inventory/item"
+	"github.com/NumberMan1/MMO-server/protocol/gen/proto"
 	"github.com/NumberMan1/common/summer/network"
-	"github.com/NumberMan1/common/summer/protocol/gen/proto"
 )
 
 // Character 角色

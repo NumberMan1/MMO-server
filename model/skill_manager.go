@@ -2,9 +2,9 @@ package model
 
 import (
 	"container/list"
-	"github.com/NumberMan1/MMO-server/define"
+	"github.com/NumberMan1/MMO-server/config/define"
+	"github.com/NumberMan1/MMO-server/protocol/gen/proto"
 	"github.com/NumberMan1/common/logger"
-	"github.com/NumberMan1/common/summer/protocol/gen/proto"
 )
 
 type SkillManager struct {
@@ -29,7 +29,7 @@ func (sm *SkillManager) InitSkills() {
 	sks := define.GetDataManagerInstance().Skills
 	s := make([]int, 0)
 	for _, v := range sks {
-		if v.TID == job {
+		if v.Job == job {
 			s = append(s, v.ID)
 		}
 	}

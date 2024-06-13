@@ -1,8 +1,8 @@
 package model
 
 import (
+	"github.com/NumberMan1/MMO-server/config/define"
 	"github.com/NumberMan1/MMO-server/core/vector3"
-	"github.com/NumberMan1/MMO-server/define"
 	"github.com/NumberMan1/common/logger"
 	"github.com/NumberMan1/common/summer/timeunit"
 	"regexp"
@@ -36,8 +36,10 @@ func NewSpawner(define *define.SpawnDefine, space *Space) *Spawner {
 	s := &Spawner{
 		Define: define,
 		Space:  space,
-		pos:    parsePoint(define.Pos),
-		dir:    parsePoint(define.Dir),
+		//pos:    parsePoint(define.Pos),
+		//dir:    parsePoint(define.Dir),
+		pos: vector3.NewVector3(float64(define.Pos[0]), float64(define.Pos[1]), float64(define.Pos[2])),
+		dir: vector3.NewVector3(float64(define.Dir[0]), float64(define.Dir[1]), float64(define.Dir[2])),
 	}
 	logger.SLCDebug("New Spawner:场景[%v],坐标[%v],单位类型[%v]，周期[%v]秒", space.Name, s.Pos, define.TID, define.Period)
 	s.spawn()

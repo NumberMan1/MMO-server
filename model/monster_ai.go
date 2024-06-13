@@ -3,7 +3,8 @@ package model
 import (
 	"github.com/NumberMan1/MMO-server/core/fsm"
 	"github.com/NumberMan1/MMO-server/core/vector3"
-	"github.com/NumberMan1/common/summer/protocol/gen/proto"
+	"github.com/NumberMan1/MMO-server/mgr"
+	"github.com/NumberMan1/MMO-server/protocol/gen/proto"
 	"github.com/NumberMan1/common/summer/timeunit"
 	"math/rand"
 )
@@ -52,7 +53,7 @@ func (ws *WalkState) OnEnter() {
 func (ws *WalkState) OnUpdate() {
 	mon := ws.P().Owner
 	//查询 8000 范围内的玩家
-	chrs := GetRangeEntityOrder[*Character](GetEntityManagerInstance(), mon.Space().Id, ws.P().ViewRange, mon.Position())
+	chrs := mgr.GetRangeEntityOrder[*Character](mgr.GetEntityManagerInstance(), mon.Space().Id, ws.P().ViewRange, mon.Position())
 	if chrs != nil {
 		var chr *Character
 		for i := 0; i < len(chrs); i++ {
@@ -88,7 +89,7 @@ func NewChaseState() *ChaseState {
 
 func (cs *ChaseState) OnUpdate() {
 	mon := cs.P().Owner
-	if mon.Target == nil || mon.Target.IsDeath() || !GetEntityManagerInstance().Exist(mon.Target.Id()) {
+	if mon.Target == nil || mon.Target.IsDeath() || !mgr.GetEntityManagerInstance().Exist(mon.Target.Id()) {
 		mon.Target = nil
 		cs.Fsm().ChangeState("walk")
 		return

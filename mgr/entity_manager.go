@@ -1,4 +1,4 @@
-package model
+package mgr
 
 import (
 	"container/list"
@@ -13,67 +13,76 @@ var (
 	singleEntityManager = singleton.Singleton{}
 )
 
-// EntityManager Entity管理器（角色，怪物，NPC，陷阱）
-type EntityManager struct {
-	index int
-	//记录全部的Entity对象，<EntityId,Entity>
-	//allEntities map[int]IEntity
-	allEntities *sync.Map
-	//记录场景里的Entity列表，<SpaceId,所有对象列表>
-	//spaceEntities map[int]*list.List
-	spaceEntities *sync.Map
-	mutex         sync.Mutex
-}
-
 func GetEntityManagerInstance() *EntityManager {
 	instance, _ := singleton.GetOrDo[*EntityManager](&singleEntityManager, func() (*EntityManager, error) {
 		return &EntityManager{
-			index: 1,
-			//allEntities:   map[int]IEntity{},
+			index:         1,
 			allEntities:   &sync.Map{},
 			spaceEntities: &sync.Map{},
-			//spaceEntities: map[int]*list.List{},
-			mutex: sync.Mutex{},
+			rwMutex:       &sync.RWMutex{},
 		}, nil
 	})
 	return instance
 }
 
-func (em *EntityManager) AddEntity(spaceId int, entity entity.IEntity) {
-	entity.EntityData().Id = int32(em.NewEntityId())
-	em.mutex.Lock()
+// EntityManager Entity管理器（角色，怪物，NPC，陷阱）
+type EntityManager struct {
+	index int64
+	//记录全部的Entity对象，<EntityId,Entity>
+	//allEntities map[int]IEntity
+	allEntities *sync.Map
+	//记录场景里的Entity列表，<SpaceId,所有对象列表>
+	//spaceEntities map[int][]entity.IEntity
+	spaceEntities *sync.Map
+	rwMutex       *sync.RWMutex
+}
+
+func NewEntityManager() *EntityManager {
+	return &EntityManager{
+		index:         1,
+		allEntities:   &sync.Map{},
+		spaceEntities: &sync.Map{},
+		rwMutex:       &sync.RWMutex{},
+	}
+}
+
+// AddEntity 在相应地图id的地图添加实体
+func (em *EntityManager) AddEntity(spaceId int, entity_ entity.IEntity) {
+	entity_.EntityData().Id = int32(em.NewEntityId())
+	em.rwMutex.Lock()
+	defer em.rwMutex.Unlock()
 	//统一管理的对象分配ID
-	em.allEntities.Store(entity.EntityId(), entity)
+	em.allEntities.Store(entity_.EntityId(), entity_)
 	_, ok := em.spaceEntities.Load(spaceId)
 	if !ok {
 		em.spaceEntities.Store(spaceId, list.New())
 	}
-	em.forUnits(spaceId, func(entities *list.List) {
-		entities.PushBack(entity)
+	em.forUnits(spaceId, func(entities []entity.IEntity) {
+		entities = append(entities, entity_)
 	})
-	em.mutex.Unlock()
 }
 
-func (em *EntityManager) forUnits(spaceId int, action func(entities *list.List)) {
+func (em *EntityManager) forUnits(spaceId int, action func(entities []entity.IEntity)) {
 	value, ok := em.spaceEntities.Load(spaceId)
 	if ok {
-		entities := value.(*list.List)
+		entities := value.([]entity.IEntity)
 		action(entities)
 	}
 }
 
+// RemoveEntity 删除实体
 func (em *EntityManager) RemoveEntity(spaceId int, ie entity.IEntity) {
-	em.mutex.Lock()
+	em.rwMutex.Lock()
+	defer em.rwMutex.Unlock()
 	em.allEntities.Delete(ie.EntityId())
-	em.forUnits(spaceId, func(entities *list.List) {
-		for e := entities.Front(); e != nil; e = e.Next() {
-			if e.Value.(entity.IEntity) == ie {
-				entities.Remove(e)
+	em.forUnits(spaceId, func(entities []entity.IEntity) {
+		for i, e := range entities {
+			if e.EntityId() == ie.EntityId() {
+				entities = append(entities[:i], entities[i+1:]...)
 				break
 			}
 		}
 	})
-	em.mutex.Unlock()
 }
 
 // ChangeSpace 更改角色所在场景
@@ -81,24 +90,26 @@ func (em *EntityManager) ChangeSpace(ie entity.IEntity, oldSpaceId, newSpaceId i
 	if oldSpaceId == newSpaceId {
 		return
 	}
-	em.forUnits(oldSpaceId, func(entities *list.List) {
-		for e := entities.Front(); e != nil; e = e.Next() {
-			if e.Value.(entity.IEntity) == ie {
-				entities.Remove(e)
+	em.forUnits(oldSpaceId, func(entities []entity.IEntity) {
+		for i, e := range entities {
+			if e.EntityId() == ie.EntityId() {
+				entities = append(entities[:i], entities[i+1:]...)
 				break
 			}
 		}
 	})
-	em.forUnits(newSpaceId, func(entities *list.List) {
-		entities.PushBack(ie)
+	em.forUnits(newSpaceId, func(entities []entity.IEntity) {
+		entities = append(entities, ie)
 	})
 }
 
+// Exist 该实体id是否存在实体
 func (em *EntityManager) Exist(entityId int) bool {
 	_, ok := em.allEntities.Load(entityId)
 	return ok
 }
 
+// GetEntity 获取实体
 func (em *EntityManager) GetEntity(entityId int) entity.IEntity {
 	v, ok := em.allEntities.Load(entityId)
 	if ok {
@@ -112,10 +123,10 @@ func (em *EntityManager) GetEntity(entityId int) entity.IEntity {
 func GetEntityList[T entity.IEntity](em *EntityManager, spaceId int, match func(T) bool) *list.List {
 	l := list.New()
 	sp, _ := em.spaceEntities.Load(spaceId)
-	for e := sp.(*list.List).Front(); e != nil; e = e.Next() {
-		if v, ok := e.Value.(T); ok {
+	for _, e := range sp.([]entity.IEntity) {
+		if v, ok := e.(T); ok {
 			if match(v) {
-				l.PushBack(e.Value)
+				l.PushBack(e)
 			}
 		}
 	}
@@ -143,14 +154,16 @@ func GetRangeEntityOrder[T entity.IEntity](em *EntityManager, spaceId, r int, ce
 	}
 }
 
-func (em *EntityManager) NewEntityId() int {
-	em.mutex.Lock()
+// NewEntityId 生成实体id
+func (em *EntityManager) NewEntityId() int64 {
+	em.rwMutex.Lock()
+	defer em.rwMutex.Unlock()
 	id := em.index
 	em.index += 1
-	em.mutex.Unlock()
 	return id
 }
 
+// Update 每帧刷新
 func (em *EntityManager) Update() {
 	em.allEntities.Range(func(key, value any) bool {
 		value.(entity.IEntity).Update()

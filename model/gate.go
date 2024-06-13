@@ -2,8 +2,9 @@ package model
 
 import (
 	"github.com/NumberMan1/MMO-server/core/vector3"
+	"github.com/NumberMan1/MMO-server/mgr"
+	"github.com/NumberMan1/MMO-server/protocol/gen/proto"
 	"github.com/NumberMan1/common/summer"
-	"github.com/NumberMan1/common/summer/protocol/gen/proto"
 	"github.com/NumberMan1/common/summer/timeunit"
 )
 
@@ -38,7 +39,7 @@ func (g *Gate) SetTargetPosition(targetPosition *vector3.Vector3) {
 
 func NewGate(spaceId, tid int, position, direction *vector3.Vector3) *Gate {
 	g := &Gate{Actor: NewActor(proto.EntityType_Gate, tid, 0, position, direction)}
-	GetEntityManagerInstance().AddEntity(spaceId, g)
+	mgr.GetEntityManagerInstance().AddEntity(spaceId, g)
 	summer.GetScheduleInstance().AddTask(g.teleport, timeunit.Milliseconds, 500, 0)
 	sp := GetSpaceManagerInstance().GetSpace(spaceId)
 	if sp != nil {
@@ -49,7 +50,7 @@ func NewGate(spaceId, tid int, position, direction *vector3.Vector3) *Gate {
 
 // teleport 执行传送
 func (g *Gate) teleport() {
-	if g.targetSpace == nil || g.targetPosition == nil {
+	if g.Space() == nil || g.TargetSpace() == nil {
 		return
 	}
 	units := RangeUnit(g.Position(), g.Space().Id, teleportGateRange)

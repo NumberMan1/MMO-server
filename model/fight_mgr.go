@@ -2,9 +2,10 @@ package model
 
 import (
 	"container/list"
+	"github.com/NumberMan1/MMO-server/mgr"
+	"github.com/NumberMan1/MMO-server/protocol/gen/proto"
 	"github.com/NumberMan1/common/logger"
 	"github.com/NumberMan1/common/ns"
-	"github.com/NumberMan1/common/summer/protocol/gen/proto"
 )
 
 // FightMgr 战斗管理器
@@ -93,7 +94,7 @@ func (fm *FightMgr) broadcastSpell() {
 }
 
 func (fm *FightMgr) RunCast(info *proto.CastInfo) {
-	caster := GetEntityManagerInstance().GetEntity(int(info.CasterId)).(IActor)
+	caster := mgr.GetEntityManagerInstance().GetEntity(int(info.CasterId)).(IActor)
 	if caster == nil {
 		logger.SLCInfo("RunCast: Caster is null %v", info.CasterId)
 		return

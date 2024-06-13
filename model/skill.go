@@ -1,13 +1,13 @@
 package model
 
 import (
+	define2 "github.com/NumberMan1/MMO-server/config/define"
 	"github.com/NumberMan1/MMO-server/core/vector3"
-	"github.com/NumberMan1/MMO-server/define"
 	"github.com/NumberMan1/MMO-server/fight"
+	"github.com/NumberMan1/MMO-server/protocol/gen/proto"
 	"github.com/NumberMan1/common/logger"
 	"github.com/NumberMan1/common/summer"
 	"github.com/NumberMan1/common/summer/core"
-	"github.com/NumberMan1/common/summer/protocol/gen/proto"
 	"github.com/NumberMan1/common/summer/timeunit"
 	"math"
 	"math/rand"
@@ -25,13 +25,13 @@ const (
 )
 
 type Skill struct {
-	IsPassive bool                // 是否被动技能
-	Def       *define.SkillDefine // 技能设定
-	Owner     IActor              // 技能归属者
-	Cd        float64             // 冷却计时，0代表技能可用
-	time      float64             // 技能运行时间
-	State     Stage               // 当前技能状态
-	notCrit   int                 // 未暴击次数
+	IsPassive bool                 // 是否被动技能
+	Def       *define2.SkillDefine // 技能设定
+	Owner     IActor               // 技能归属者
+	Cd        float64              // 冷却计时，0代表技能可用
+	time      float64              // 技能运行时间
+	State     Stage                // 当前技能状态
+	notCrit   int                  // 未暴击次数
 	target    fight.ISCObject
 	//rand      *rand.Rand
 }
@@ -39,13 +39,14 @@ type Skill struct {
 func NewSkill(owner IActor, skid int) *Skill {
 	s := &Skill{
 		Owner: owner,
-		Def:   define.GetDataManagerInstance().Skills[skid],
+		Def:   define2.GetDataManagerInstance().Skills[skid],
 		//rand:  rand.New(rand.NewSource(time.Now().Unix())),
 	}
 	//伤害延迟默认float[]={0}
 	if len(s.Def.HitDelay) == 0 {
 		s.Def.HitDelay = []float32{0}
 	}
+
 	return s
 }
 

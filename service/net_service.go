@@ -1,18 +1,20 @@
 package service
 
 import (
+	"github.com/NumberMan1/MMO-server/config"
 	core2 "github.com/NumberMan1/MMO-server/model"
+	"github.com/NumberMan1/MMO-server/protocol/gen/proto"
 	"github.com/NumberMan1/common/logger"
 	"github.com/NumberMan1/common/summer/network"
-	"github.com/NumberMan1/common/summer/network/core"
-	"github.com/NumberMan1/common/summer/protocol/gen/proto"
+	"github.com/NumberMan1/common/summer/network/message_router"
+	"strconv"
 	"sync"
 	"time"
 )
 
 // NetService 网络服务
 type NetService struct {
-	tcpServer *core.TcpServer
+	tcpServer *network.TcpServer
 	//记录conn最后一次心跳包的时间
 	//heartBeatPairs map[network.Connection]time.Time
 	heartBeatPairs *sync.Map
@@ -21,7 +23,8 @@ type NetService struct {
 }
 
 func NewNetService() *NetService {
-	server, _ := core.NewTcpServer("127.0.0.1:32510")
+	//server, _ := network.NewTcpServer("127.0.0.1:32510")
+	server, _ := network.NewTcpServer(config.ServerConfig.Server.Host + ":" + strconv.FormatInt(int64(config.ServerConfig.Server.Port), 10))
 	n := &NetService{
 		tcpServer: server,
 		//heartBeatPairs: map[network.Connection]time.Time{},
@@ -29,8 +32,8 @@ func NewNetService() *NetService {
 		heartTicker:    time.NewTicker(5 * time.Second),
 		cancel:         make(chan struct{}, 1),
 	}
-	server.SetConnectedCallback(core.TcpServerConnectedCallback{Op: n.onClientConnected})
-	server.SetDisconnectedCallback(core.TcpServerDisconnectedCallback{Op: n.onDisconnected})
+	server.SetConnectedCallback(network.TcpServerConnectedCallback{Op: n.onClientConnected})
+	server.SetDisconnectedCallback(network.TcpServerDisconnectedCallback{Op: n.onDisconnected})
 	return n
 }
 
@@ -38,13 +41,14 @@ func (n *NetService) Start() {
 	//启动网络监听，指定消息包装类型
 	n.tcpServer.Start()
 	//启动消息分发器
-	network.GetMessageRouterInstance().Start(4)
-	network.GetMessageRouterInstance().Subscribe("proto.HeartBeatRequest", network.MessageHandler{Op: n.heartBeatRequest})
+	//network.GetMessageRouterInstance().Start(4)
+	network.GetMessageRouterInstance().Start(config.ServerConfig.Server.WorkerCount)
+	network.GetMessageRouterInstance().Subscribe("proto.HeartBeatRequest", message_router.MessageHandler{Op: n.heartBeatRequest})
 	go n.timerCallback()
 }
 
 func (n *NetService) Stop() {
-	network.GetMessageRouterInstance().Off("proto.HeartBeatRequest", network.MessageHandler{Op: n.heartBeatRequest})
+	network.GetMessageRouterInstance().Off("proto.HeartBeatRequest", message_router.MessageHandler{Op: n.heartBeatRequest})
 	err := n.tcpServer.Stop()
 	if err != nil {
 		return
@@ -54,11 +58,11 @@ func (n *NetService) Stop() {
 }
 
 // 收到心跳包
-func (n *NetService) heartBeatRequest(msg network.Msg) {
+func (n *NetService) heartBeatRequest(msg message_router.Msg) {
 	//n.heartBeatPairs[msg.Sender] = time.Now()
-	n.heartBeatPairs.Store(msg.Sender, time.Now())
+	n.heartBeatPairs.Store(msg.Sender.(network.Connection), time.Now())
 	p := &proto.HeartBeatResponse{}
-	msg.Sender.Send(p)
+	msg.Sender.(network.Connection).Send(p)
 }
 
 func (n *NetService) timerCallback() {

@@ -1,0 +1,28 @@
+{
+  "1": {
+    "BID": 1,
+    "Name": "燃烧",
+    "Description": "持续燃烧伤害",
+    "IconPath": "Scene1",
+    "MaxDuration": 5,
+    "MaxLevel": 1,
+    "BuffType": "负增益",
+    "BuffConflict": "覆盖",
+    "Dispellable": 1,
+    "Demotion": 1,
+    "TimeScale": 1
+  },
+  "2": {
+    "BID": 2,
+    "Name": "回春术",
+    "Description": "持续恢复生命",
+    "IconPath": "Scene2",
+    "MaxDuration": 5,
+    "MaxLevel": 1,
+    "BuffType": "正增益",
+    "BuffConflict": "覆盖",
+    "Dispellable": 1,
+    "Demotion": 1,
+    "TimeScale": 1
+  }
+}

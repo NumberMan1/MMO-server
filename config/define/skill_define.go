@@ -1,11 +1,13 @@
 package define
 
+import "encoding/json"
+
 // 1. 每个 Sheet 形成一个 Struct 定义, Sheet 的名称作为 Struct 的名称
 // 2. 表格约定：第一行是变量名称，第二行是变量类型
 
 type SkillDefine struct {
 	ID           int       `json:"ID" bson:"id"`                      // 编号
-	TID          int       `json:"TID" bson:"tid"`                    // 单位类型
+	Job          int       `json:"Job" bson:"job"`                    // 单位类型
 	Code         int       `json:"Code" bson:"code"`                  // 技能码
 	Name         string    `json:"Name" bson:"name"`                  // 技能名称
 	Description  string    `json:"Description" bson:"description"`    // 技能描述
@@ -34,6 +36,45 @@ type SkillDefine struct {
 	AP           float32   `json:"AP" bson:"ap"`                      // 法术攻击
 	ADC          float32   `json:"ADC" bson:"adc"`                    // 物攻加成
 	APC          float32   `json:"APC" bson:"apc"`                    // 法攻加成
+}
+
+// UnmarshalJSON Custom unmarshalling to handle the specific requirements
+func (s *SkillDefine) UnmarshalJSON(data []byte) error {
+	type Alias SkillDefine
+	aux := &struct {
+		IsMissile int    `json:"IsMissile"`
+		HitDelay  string `json:"HitDelay"`
+		BUFF      string `json:"BUFF"`
+		*Alias
+	}{
+		Alias: (*Alias)(s),
+	}
+
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+
+	// Convert IsMissile from int to bool
+	s.IsMissile = aux.IsMissile == 1
+
+	// Convert HitDelay from string to []float32
+	if aux.HitDelay != "" {
+		var hitDelay []float32
+		if err := json.Unmarshal([]byte(aux.HitDelay), &hitDelay); err != nil {
+			return err
+		}
+		s.HitDelay = hitDelay
+	}
+
+	// Convert BUFF from string to []int
+	if aux.BUFF != "" {
+		var buff []int
+		if err := json.Unmarshal([]byte(aux.BUFF), &buff); err != nil {
+			return err
+		}
+		s.BUFF = buff
+	}
+	return nil
 }
 
 func (s *SkillDefine) GetId() int {

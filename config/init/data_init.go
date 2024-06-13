@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"github.com/NumberMan1/MMO-server/define"
+	"fmt"
+	"github.com/NumberMan1/MMO-server/bootstrap"
+	define2 "github.com/NumberMan1/MMO-server/config/define"
 	"github.com/NumberMan1/common"
 	"github.com/NumberMan1/common/logger"
 	mongobrocker "github.com/NumberMan1/common/mongo"
@@ -27,7 +29,7 @@ func load[T any](filePath string) map[int]T {
 	}
 	return result
 }
-func save[T define.IDefine](ctx context.Context, client *mongobrocker.Client, kv map[int]T) {
+func save[T define2.IDefine](ctx context.Context, client *mongobrocker.Client, kv map[int]T) {
 	index := options.Index()
 	index.SetUnique(true)
 	index.SetName("id")
@@ -53,35 +55,43 @@ func save[T define.IDefine](ctx context.Context, client *mongobrocker.Client, kv
 }
 
 func main() {
+	bootstrap.Init("config/config.yaml")
 	executable, err := os.Executable()
 	if err != nil {
 		panic(err)
 	}
-	spaces := load[*define.SpaceDefine](filepath.Dir(executable) + "/out/SpaceDefine.json")
-	units := load[*define.UnitDefine](filepath.Dir(executable) + "/out/UnitDefine.json")
-	spawns := load[*define.SpawnDefine](filepath.Dir(executable) + "/out/SpawnDefine.json")
-	skills := load[*define.SkillDefine](filepath.Dir(executable) + "/out/SkillDefine.json")
-	items := load[*define.ItemDefine](filepath.Dir(executable) + "/out/ItemDefine.json")
+	buffs := load[*define2.BuffDefine](filepath.Dir(executable) + "/out/BuffDefine.json")
+	spaces := load[*define2.SpaceDefine](filepath.Dir(executable) + "/out/SpaceDefine.json")
+	units := load[*define2.UnitDefine](filepath.Dir(executable) + "/out/UnitDefine.json")
+	spawns := load[*define2.SpawnDefine](filepath.Dir(executable) + "/out/SpawnDefine.json")
+	skills := load[*define2.SkillDefine](filepath.Dir(executable) + "/out/SkillDefine.json")
+	items := load[*define2.ItemDefine](filepath.Dir(executable) + "/out/ItemDefine.json")
+	levels := load[*define2.LevelDefine](filepath.Dir(executable) + "/out/LevelDefine.json")
 	ctx := context.Background()
 	client := &mongobrocker.Client{
 		BaseComponent: common.NewBaseComponent(),
 		RealCli: mongobrocker.NewClient(ctx, &mongobrocker.Config{
-			URI:         "mongodb://localhost:26017",
+			URI:         "mongodb://localhost:27017",
 			MinPoolSize: 3,
 			MaxPoolSize: 3000,
 		}),
 	}
 	defer client.RealCli.Disconnect(ctx)
-	//将技能信息存入mongo
-	save[*define.SpaceDefine](ctx, client, spaces)
-	save[*define.UnitDefine](ctx, client, units)
-	save[*define.SpawnDefine](ctx, client, spawns)
-	save[*define.SkillDefine](ctx, client, skills)
-	save[*define.ItemDefine](ctx, client, items)
-	define.GetDataManagerInstance().Init()
-	logger.SLCInfo("Spaces:%v", define.GetDataManagerInstance().Spaces)
-	logger.SLCInfo("Units:%v", define.GetDataManagerInstance().Units)
-	logger.SLCInfo("Items:%v", define.GetDataManagerInstance().Items)
-	logger.SLCInfo("Spawns:%v", define.GetDataManagerInstance().Spawns)
-	logger.SLCInfo("Skills:%v", define.GetDataManagerInstance().Skills)
+	if len(os.Args) > 1 && os.Args[1] == "init" { //提供init参数
+		//将技能信息存入mongo
+		save[*define2.BuffDefine](ctx, client, buffs)
+		save[*define2.SpaceDefine](ctx, client, spaces)
+		save[*define2.UnitDefine](ctx, client, units)
+		save[*define2.SpawnDefine](ctx, client, spawns)
+		save[*define2.SkillDefine](ctx, client, skills)
+		save[*define2.ItemDefine](ctx, client, items)
+		save[*define2.LevelDefine](ctx, client, levels)
+	}
+	define2.GetDataManagerInstance().Init()
+	fmt.Println("Buffs:", define2.GetDataManagerInstance().Buffs)
+	fmt.Println("Spaces:", define2.GetDataManagerInstance().Spaces)
+	fmt.Println("Units:", define2.GetDataManagerInstance().Units)
+	fmt.Println("Items:", define2.GetDataManagerInstance().Items)
+	fmt.Println("Spawns:", define2.GetDataManagerInstance().Spawns)
+	fmt.Println("Skills:", define2.GetDataManagerInstance().Skills)
 }

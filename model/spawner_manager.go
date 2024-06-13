@@ -2,7 +2,7 @@ package model
 
 import (
 	"container/list"
-	"github.com/NumberMan1/MMO-server/define"
+	define2 "github.com/NumberMan1/MMO-server/config/define"
 )
 
 // SpawnManager 刷怪管理器
@@ -18,8 +18,8 @@ func NewSpawnManager() *SpawnManager {
 func (sm *SpawnManager) Init(space *Space) {
 	sm.Space = space
 	//根据当前场景加载对应的规则
-	rules := make([]*define.SpawnDefine, 0)
-	for _, v := range define.GetDataManagerInstance().Spawns {
+	rules := make([]*define2.SpawnDefine, 0)
+	for _, v := range define2.GetDataManagerInstance().Spawns {
 		if v.SpaceId == space.Id {
 			rules = append(rules, v)
 		}

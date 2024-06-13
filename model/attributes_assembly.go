@@ -6,70 +6,68 @@ import (
 )
 
 type AttributesAssembly struct {
-	initial *fight.Attributes //初始属性(来自于mongo的属性)
-	growth  *fight.Attributes //成长属性
-	//Basic *fight.Attributes //基础属性（初始+成长）
+	Basic *fight.Attributes //基础属性（初始+成长）
 	equip *fight.Attributes //装备属性
 	buffs *fight.Attributes //Buff属性
 	Final *fight.Attributes //最终属性
-	actor IActor
+	owner IActor
 }
 
 func NewAttributesAssembly() *AttributesAssembly {
 	return &AttributesAssembly{
-		initial: &fight.Attributes{},
-		growth:  &fight.Attributes{},
-		equip:   &fight.Attributes{},
-		buffs:   &fight.Attributes{},
-		Final:   &fight.Attributes{},
+		Basic: &fight.Attributes{},
+		equip: &fight.Attributes{},
+		buffs: &fight.Attributes{},
+		Final: &fight.Attributes{},
 	}
 }
 
 func (aa *AttributesAssembly) Init(actor IActor) {
-	aa.actor = actor
+	aa.owner = actor
+	unitDefine := aa.owner.Define()
+
+	aa.equip.Reset()
+	aa.buffs.Reset()
+	aa.Final.Reset()
+	//基础属性
+	aa.Basic = &fight.Attributes{
+		Speed:     float32(unitDefine.Speed),
+		HPMax:     unitDefine.HPMax,
+		MPMax:     unitDefine.MPMax,
+		AD:        unitDefine.AD,
+		AP:        unitDefine.AP,
+		DEF:       unitDefine.DEF,
+		MDEF:      unitDefine.MDEF,
+		CRI:       unitDefine.CRI,
+		CRD:       unitDefine.CRD,
+		STR:       unitDefine.STR,
+		INT:       unitDefine.INT,
+		AGI:       unitDefine.AGI,
+		HitRate:   unitDefine.HitRate,
+		DodgeRate: unitDefine.DodgeRate,
+		HpRegen:   unitDefine.HpRegen,
+		HpSteal:   unitDefine.HpSteal,
+	}
 	aa.Reload()
 }
 
 // Reload 重新加载
 func (aa *AttributesAssembly) Reload() {
-	aa.growth.Reset()
-	aa.equip.Reset()
-	aa.buffs.Reset()
-	aa.Final.Reset()
-
-	define := aa.actor.Define()
-	level := aa.actor.Info().Level
-	//初始化属性
-	aa.initial.Speed = float32(define.Speed)
-	aa.initial.HPMax = define.HPMax
-	aa.initial.MPMax = define.MPMax
-	aa.initial.AD = define.AD
-	aa.initial.AP = define.AP
-	aa.initial.DEF = define.DEF
-	aa.initial.MDEF = define.MDEF
-	aa.initial.CRI = define.CRI
-	aa.initial.CRD = define.CRD
-	aa.initial.STR = define.STR
-	aa.initial.INT = define.INT
-	aa.initial.AGI = define.AGI
-	aa.initial.HitRate = define.HitRate
-	aa.initial.DodgeRate = define.DodgeRate
-	aa.initial.HpRegen = define.HpRegen
-	aa.initial.HpSteal = define.HpSteal
+	define := aa.owner.Define()
+	level := aa.owner.Info().Level
 
 	//成长属性
-	aa.growth.STR = define.GSTR * float32(level) // 力量成长
-	aa.growth.INT = define.GINT * float32(level) // 智力成长
-	aa.growth.AGI = define.GAGI * float32(level) // 敏捷成长
-
-	////基础属性（初始+成长）
-	//a.Basic.Add(initial)
-	//a.Basic.Add(growth)
+	growth := &fight.Attributes{
+		STR: define.GSTR * float32(level), // 力量成长
+		INT: define.GINT * float32(level), // 智力成长
+		AGI: define.GAGI * float32(level), // 敏捷成长
+	}
 
 	//todo 处理装备和buff
-	//合并到最终属性"
-	aa.Final.Add(aa.initial)
-	aa.Final.Add(aa.growth)
+	//合并到最终属性
+	aa.Final.Reset()
+	aa.Final.Add(aa.Basic)
+	aa.Final.Add(growth)
 	aa.Final.Add(aa.equip)
 	aa.Final.Add(aa.buffs)
 	//附加属性
@@ -80,10 +78,7 @@ func (aa *AttributesAssembly) Reload() {
 	aa.Final.Add(extra)
 	logger.SLCInfo("最终属性：%v", aa.Final)
 	//赋值与同步
-	aa.actor.SetSpeed(int(aa.Final.Speed))
-	logger.SLCInfo("最终属性speed：%v", aa.actor.Speed())
-	aa.actor.Info().Hpmax = aa.Final.HPMax
-	aa.actor.Info().Mpmax = aa.Final.MPMax
-	aa.actor.OnHpMaxChanged(aa.Final.HPMax)
-	aa.actor.OnMpMaxChanged(aa.Final.MPMax)
+	aa.owner.SetSpeed(int(aa.Final.Speed))
+	aa.owner.SyncHpMax(aa.Final.HPMax)
+	aa.owner.SyncMpMax(aa.Final.MPMax)
 }

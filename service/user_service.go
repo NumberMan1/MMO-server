@@ -3,11 +3,14 @@ package service
 import (
 	"github.com/NumberMan1/MMO-server/core/vector3"
 	"github.com/NumberMan1/MMO-server/database"
+	"github.com/NumberMan1/MMO-server/mgr"
 	"github.com/NumberMan1/MMO-server/model"
+	"github.com/NumberMan1/MMO-server/protocol/gen/proto"
+	"github.com/NumberMan1/common/global/variable"
 	"github.com/NumberMan1/common/logger"
 	"github.com/NumberMan1/common/ns/singleton"
 	"github.com/NumberMan1/common/summer/network"
-	"github.com/NumberMan1/common/summer/protocol/gen/proto"
+	"github.com/NumberMan1/common/summer/network/message_router"
 	"slices"
 	"strings"
 	"unicode/utf8"
@@ -30,24 +33,24 @@ func GetUserServiceInstance() *UserService {
 }
 
 func (us *UserService) Start() {
-	network.GetMessageRouterInstance().Subscribe("proto.GameEnterRequest", network.MessageHandler{Op: us.gameEnterRequest})
-	network.GetMessageRouterInstance().Subscribe("proto.UserLoginRequest", network.MessageHandler{Op: us.userLoginRequest})
-	network.GetMessageRouterInstance().Subscribe("proto.UserRegisterRequest", network.MessageHandler{Op: us.userRegisterRequest})
-	network.GetMessageRouterInstance().Subscribe("proto.CharacterDeleteRequest", network.MessageHandler{Op: us.characterDeleteRequest})
-	network.GetMessageRouterInstance().Subscribe("proto.CharacterListRequest", network.MessageHandler{Op: us.characterListRequest})
-	network.GetMessageRouterInstance().Subscribe("proto.CharacterCreateRequest", network.MessageHandler{Op: us.characterCreateRequest})
-	network.GetMessageRouterInstance().Subscribe("proto.ReviveRequest", network.MessageHandler{Op: us.reviveRequest})
-	network.GetMessageRouterInstance().Subscribe("proto.PickupItemRequest", network.MessageHandler{Op: us.pickupItemRequest})
-	network.GetMessageRouterInstance().Subscribe("proto.InventoryRequest", network.MessageHandler{Op: us.inventoryRequest})
+	network.GetMessageRouterInstance().Subscribe("proto.GameEnterRequest", message_router.MessageHandler{Op: us.gameEnterRequest})
+	network.GetMessageRouterInstance().Subscribe("proto.UserLoginRequest", message_router.MessageHandler{Op: us.userLoginRequest})
+	network.GetMessageRouterInstance().Subscribe("proto.UserRegisterRequest", message_router.MessageHandler{Op: us.userRegisterRequest})
+	network.GetMessageRouterInstance().Subscribe("proto.CharacterDeleteRequest", message_router.MessageHandler{Op: us.characterDeleteRequest})
+	network.GetMessageRouterInstance().Subscribe("proto.CharacterListRequest", message_router.MessageHandler{Op: us.characterListRequest})
+	network.GetMessageRouterInstance().Subscribe("proto.CharacterCreateRequest", message_router.MessageHandler{Op: us.characterCreateRequest})
+	network.GetMessageRouterInstance().Subscribe("proto.ReviveRequest", message_router.MessageHandler{Op: us.reviveRequest})
+	network.GetMessageRouterInstance().Subscribe("proto.PickupItemRequest", message_router.MessageHandler{Op: us.pickupItemRequest})
+	network.GetMessageRouterInstance().Subscribe("proto.InventoryRequest", message_router.MessageHandler{Op: us.inventoryRequest})
 	//物品放置请求
-	network.GetMessageRouterInstance().Subscribe("proto.ItemPlacementRequest", network.MessageHandler{Op: us.itemPlacementRequest})
+	network.GetMessageRouterInstance().Subscribe("proto.ItemPlacementRequest", message_router.MessageHandler{Op: us.itemPlacementRequest})
 	//使用物品
-	network.GetMessageRouterInstance().Subscribe("proto.ItemUseRequest", network.MessageHandler{Op: us.itemUseRequest})
+	network.GetMessageRouterInstance().Subscribe("proto.ItemUseRequest", message_router.MessageHandler{Op: us.itemUseRequest})
 	//丢弃物品
-	network.GetMessageRouterInstance().Subscribe("proto.ItemDiscardRequest", network.MessageHandler{Op: us.itemDiscardRequest})
+	network.GetMessageRouterInstance().Subscribe("proto.ItemDiscardRequest", message_router.MessageHandler{Op: us.itemDiscardRequest})
 }
 
-func (us *UserService) itemDiscardRequest(msg network.Msg) {
+func (us *UserService) itemDiscardRequest(msg message_router.Msg) {
 	rsq := msg.Message.(*proto.ItemDiscardRequest)
 	chr, ok := model.GetUnit(int(rsq.EntityId)).(*model.Character)
 	if !ok {
@@ -57,7 +60,7 @@ func (us *UserService) itemDiscardRequest(msg network.Msg) {
 	chr.SendInventory(true, false, false)
 }
 
-func (us *UserService) itemUseRequest(msg network.Msg) {
+func (us *UserService) itemUseRequest(msg message_router.Msg) {
 	rsq := msg.Message.(*proto.ItemUseRequest)
 	chr, ok := model.GetUnit(int(rsq.EntityId)).(*model.Character)
 	if !ok {
@@ -66,7 +69,7 @@ func (us *UserService) itemUseRequest(msg network.Msg) {
 	chr.UseItem(int(rsq.SlotIndex))
 }
 
-func (us *UserService) itemPlacementRequest(msg network.Msg) {
+func (us *UserService) itemPlacementRequest(msg message_router.Msg) {
 	rsq := msg.Message.(*proto.ItemPlacementRequest)
 	chr, ok := model.GetUnit(int(rsq.EntityId)).(*model.Character)
 	if !ok {
@@ -77,7 +80,7 @@ func (us *UserService) itemPlacementRequest(msg network.Msg) {
 	chr.SendInventory(true, false, false)
 }
 
-func (us *UserService) inventoryRequest(msg network.Msg) {
+func (us *UserService) inventoryRequest(msg message_router.Msg) {
 	rsq := msg.Message.(*proto.InventoryRequest)
 	chr, ok := model.GetUnit(int(rsq.EntityId)).(*model.Character)
 	if !ok {
@@ -87,8 +90,8 @@ func (us *UserService) inventoryRequest(msg network.Msg) {
 	chr.SendInventory(rsq.QueryKnapsack, rsq.QueryWarehouse, rsq.QueryEquipment)
 }
 
-func (us *UserService) pickupItemRequest(msg network.Msg) {
-	s1 := msg.Sender.Get("Session").(*model.Session)
+func (us *UserService) pickupItemRequest(msg message_router.Msg) {
+	s1 := msg.Sender.(network.Connection).Get("Session").(*model.Session)
 	if s1 == nil {
 		return
 	}
@@ -117,13 +120,13 @@ func (us *UserService) pickupItemRequest(msg network.Msg) {
 	}
 	//物品模型移出场景
 	chr.Space().EntityLeave(itemEntity)
-	model.GetEntityManagerInstance().RemoveEntity(chr.Space().Id, itemEntity)
+	mgr.GetEntityManagerInstance().RemoveEntity(chr.Space().Id, itemEntity)
 	logger.SLCInfo("玩家拾取物品Chr[%v],背包[%v]", chr.CharacterId(), chr.Knapsack.InventoryInfo())
 	//发送背包数据
 	chr.SendInventory(true, false, false)
 }
 
-func (us *UserService) reviveRequest(msg network.Msg) {
+func (us *UserService) reviveRequest(msg message_router.Msg) {
 	message := msg.Message.(*proto.ReviveRequest)
 	actor := model.GetUnit(int(message.GetEntityId()))
 	if chr, ok := actor.(*model.Character); ok && chr.IsDeath() && chr.Conn == msg.Sender {
@@ -133,10 +136,11 @@ func (us *UserService) reviveRequest(msg network.Msg) {
 	}
 }
 
-func (us *UserService) userRegisterRequest(msg network.Msg) {
+func (us *UserService) userRegisterRequest(msg message_router.Msg) {
 	message := msg.Message.(*proto.UserRegisterRequest)
+	conn := msg.Sender.(network.Connection)
 	var num int64
-	database.OrmDb.Model(&database.DbPlayer{}).Where("username = ?", message.Username).Count(&num)
+	variable.GDb.Model(&database.DbPlayer{}).Where("username = ?", message.Username).Count(&num)
 	logger.SLCInfo("新用户注册:%s", message.Username)
 	resp := &proto.UserRegisterResponse{}
 	if num > 0 {
@@ -147,17 +151,18 @@ func (us *UserService) userRegisterRequest(msg network.Msg) {
 			Username: message.Username,
 			Password: message.Password,
 		}
-		database.OrmDb.Save(dbPlayer)
+		variable.GDb.Save(dbPlayer)
 		resp.Code = 6
 		resp.Message = "注册成功"
 	}
-	msg.Sender.Send(resp)
+	conn.Send(resp)
 }
 
 // 删除角色的请求
-func (us *UserService) characterDeleteRequest(msg network.Msg) {
-	player := msg.Sender.Get("Session").(*model.Session).DbPlayer
-	database.OrmDb.Where("id = ?", msg.Message.(*proto.CharacterDeleteRequest).CharacterId).
+func (us *UserService) characterDeleteRequest(msg message_router.Msg) {
+	conn := msg.Sender.(network.Connection)
+	player := conn.Get("Session").(*model.Session).DbPlayer
+	variable.GDb.Where("id = ?", msg.Message.(*proto.CharacterDeleteRequest).CharacterId).
 		Where("player_id = ?", player.ID).
 		Delete(&database.DbCharacter{})
 	//给客户端响应
@@ -165,15 +170,16 @@ func (us *UserService) characterDeleteRequest(msg network.Msg) {
 		Success: true,
 		Message: "执行完成",
 	}
-	msg.Sender.Send(rsp)
+	conn.Send(rsp)
 }
 
 // 查询角色列表的请求
-func (us *UserService) characterListRequest(msg network.Msg) {
-	player := msg.Sender.Get("Session").(*model.Session).DbPlayer
+func (us *UserService) characterListRequest(msg message_router.Msg) {
+	conn := msg.Sender.(network.Connection)
+	player := conn.Get("Session").(*model.Session).DbPlayer
 	characters := make([]database.DbCharacter, 0)
 	//从数据库查询出当前玩家的全部角色
-	database.OrmDb.Where("player_id = ?", player.ID).Find(&characters)
+	variable.GDb.Where("player_id = ?", player.ID).Find(&characters)
 	rsp := &proto.CharacterListResponse{CharacterList: make([]*proto.NetActor, 0)}
 	for _, character := range characters {
 		rsp.CharacterList = append(rsp.CharacterList, &proto.NetActor{
@@ -188,31 +194,32 @@ func (us *UserService) characterListRequest(msg network.Msg) {
 			//Entity:   nil,
 		})
 	}
-	msg.Sender.Send(rsp)
+	msg.Sender.(network.Connection).Send(rsp)
 }
 
 // 创建角色
-func (us *UserService) characterCreateRequest(msg network.Msg) {
+func (us *UserService) characterCreateRequest(msg message_router.Msg) {
 	logger.SLCInfo("创建角色:%v", msg.Message)
+	conn := msg.Sender.(network.Connection)
 	rsp := &proto.ChracterCreateResponse{
 		Success:   false,
 		Character: nil,
 	}
-	player := msg.Sender.Get("Session").(*model.Session).DbPlayer
+	player := conn.Get("Session").(*model.Session).DbPlayer
 	if player == nil {
 		// 未登录不能创建角色
 		logger.SLCInfo("未登录不能创建角色")
 		rsp.Message = "未登录不能创建角色"
-		msg.Sender.Send(rsp)
+		conn.Send(rsp)
 		return
 	}
 	var num int64
-	database.OrmDb.Model(&database.DbCharacter{}).Where("player_id = ?", player.ID).Count(&num)
+	variable.GDb.Model(&database.DbCharacter{}).Where("player_id = ?", player.ID).Count(&num)
 	if num >= 4 {
 		// 角色数量最多4个
 		logger.SLCInfo("角色数量最多4个")
 		rsp.Message = "角色数量最多4个"
-		msg.Sender.Send(rsp)
+		conn.Send(rsp)
 		return
 	}
 	msgTemp := msg.Message.(*proto.CharacterCreateRequest)
@@ -221,22 +228,22 @@ func (us *UserService) characterCreateRequest(msg network.Msg) {
 	if nameLen == 0 || strings.ContainsAny(msgTemp.Name, " \t\r\n\\") {
 		logger.SLCInfo("创建角色失败，角色名不能为空或包含非法字符如空格等")
 		rsp.Message = "判断角色名不能为空或包含非法字符如空格等"
-		msg.Sender.Send(rsp)
+		conn.Send(rsp)
 		return
 	}
 	//角色名最长7个字
 	if nameLen > 7 {
 		logger.SLCInfo("创建角色失败，角色名不能超过7个字符")
 		rsp.Message = "创建角色失败，角色名不能超过7个字符"
-		msg.Sender.Send(rsp)
+		conn.Send(rsp)
 		return
 	}
 	//检验角色名是否存在
-	database.OrmDb.Model(&database.DbCharacter{}).Where("name = ?", msgTemp.Name).Count(&num)
+	variable.GDb.Model(&database.DbCharacter{}).Where("name = ?", msgTemp.Name).Count(&num)
 	if num > 0 {
 		logger.SLCInfo("创建角色失败，角色名已存在")
 		rsp.Message = "创建角色失败，角色名已存在"
-		msg.Sender.Send(rsp)
+		conn.Send(rsp)
 		return
 	}
 	//出生点坐标|
@@ -249,19 +256,20 @@ func (us *UserService) characterCreateRequest(msg network.Msg) {
 	dbCharacter.Y = int(birthPos.Y)
 	dbCharacter.Z = int(birthPos.Z)
 	dbCharacter.PlayerId = int(player.ID)
-	tx := database.OrmDb.Save(dbCharacter)
+	tx := variable.GDb.Save(dbCharacter)
 	if tx.RowsAffected > 0 {
 		rsp.Success = true
 		rsp.Message = "角色创建成功"
-		msg.Sender.Send(rsp)
+		conn.Send(rsp)
 	}
 }
 
-func (us *UserService) userLoginRequest(msg network.Msg) {
+func (us *UserService) userLoginRequest(msg message_router.Msg) {
 	req := msg.Message.(*proto.UserLoginRequest)
 	dbPlayer := &database.DbPlayer{}
-	result := database.OrmDb.Where("username = ? and password = ?", req.Username, req.Password).First(&dbPlayer)
+	result := variable.GDb.Where("username = ? and password = ?", req.Username, req.Password).First(&dbPlayer)
 	rsp := &proto.UserLoginResponse{}
+	conn := msg.Sender.(network.Connection)
 	if result.Error != nil {
 		rsp.Success = false
 		rsp.Message = result.Error.Error()
@@ -270,30 +278,31 @@ func (us *UserService) userLoginRequest(msg network.Msg) {
 	if result.RowsAffected > 0 {
 		rsp.Success = true
 		rsp.Message = "登录成功"
-		msg.Sender.Get("Session").(*model.Session).DbPlayer = dbPlayer //登录成功，在conn里记录用户信息
+		conn.Get("Session").(*model.Session).DbPlayer = dbPlayer //登录成功，在conn里记录用户信息
 	} else {
 		rsp.Success = false
 		rsp.Message = "用户名或密码错误"
 	}
-	msg.Sender.Send(rsp)
+	conn.Send(rsp)
 }
 
-func (us *UserService) gameEnterRequest(msg network.Msg) {
+func (us *UserService) gameEnterRequest(msg message_router.Msg) {
 	rsq := msg.Message.(*proto.GameEnterRequest)
+	conn := msg.Sender.(network.Connection)
 	logger.SLCInfo("有玩家进入游戏,角色Id:%d", rsq.CharacterId)
 	// 获取当前玩家
-	player := msg.Sender.Get("Session").(*model.Session).DbPlayer
+	player := conn.Get("Session").(*model.Session).DbPlayer
 	// 查询数据库的角色
 	dbRole := &database.DbCharacter{}
-	database.OrmDb.Where("player_id = ?", player.ID).
+	variable.GDb.Where("player_id = ?", player.ID).
 		Where("id = ?", rsq.CharacterId).First(dbRole)
 	logger.SLCInfo("dbRole = %v", dbRole)
 	// 把数据库角色变成游戏角色
 	character := model.GetCharacterManagerInstance().CreateCharacter(dbRole)
 	//角色与conn关联
-	character.Conn = msg.Sender
+	character.Conn = conn
 	//角色存入session
-	msg.Sender.Get("Session").(*model.Session).Character = character
+	conn.Get("Session").(*model.Session).Character = character
 	logger.SLCInfo("%v", character.Speed())
 	////通知玩家登录成功
 	//response := &proto.GameEnterResponse{

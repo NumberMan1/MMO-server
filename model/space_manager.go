@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/NumberMan1/MMO-server/define"
+	"github.com/NumberMan1/MMO-server/config/define"
 	"github.com/NumberMan1/common/logger"
 	"github.com/NumberMan1/common/ns/singleton"
 )
