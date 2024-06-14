@@ -16,7 +16,7 @@ type SpawnDefine struct {
 	//Dir     string `json:"Dir" bson:"dir"`          // 刷怪方向
 	Pos    []int `json:"Pos" bson:"pos"`       // 刷怪位置
 	Dir    []int `json:"Dir" bson:"dir"`       // 刷怪方向
-	TID    int   `json:"Job" bson:"tid"`       // 单位类型
+	TID    int   `json:"TID" bson:"tid"`       // 单位类型
 	Level  int   `json:"Level" bson:"level"`   // 单位等级
 	Period int   `json:"Period" bson:"period"` // 刷怪周期（秒）
 	Count  int   `json:"Count" bson:"count"`   // 刷怪数量
