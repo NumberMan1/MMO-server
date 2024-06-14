@@ -2,7 +2,6 @@ package model
 
 import (
 	"github.com/NumberMan1/MMO-server/config/define"
-	"github.com/NumberMan1/MMO-server/core/vector3"
 	"github.com/NumberMan1/MMO-server/model/entity"
 	"github.com/NumberMan1/MMO-server/protocol/gen/proto"
 )
@@ -39,9 +38,7 @@ type IActor interface {
 	Attr() *AttributesAssembly
 	SetAttr(attr *AttributesAssembly)
 	IsDeath() bool
-	OnEnterSpace(space *Space, chr IActor)
 	Revive()
-	TeleportSpace(space *Space, pos, dir *vector3.Vector3, chr IActor)
 	Update()
 	Die(killerID int)
 	OnBeforeDie(killerID int)

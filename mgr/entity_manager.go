@@ -15,12 +15,7 @@ var (
 
 func GetEntityManagerInstance() *EntityManager {
 	instance, _ := singleton.GetOrDo[*EntityManager](&singleEntityManager, func() (*EntityManager, error) {
-		return &EntityManager{
-			index:         1,
-			allEntities:   &sync.Map{},
-			spaceEntities: &sync.Map{},
-			rwMutex:       &sync.RWMutex{},
-		}, nil
+		return NewEntityManager(), nil
 	})
 	return instance
 }
@@ -53,20 +48,18 @@ func (em *EntityManager) AddEntity(spaceId int, entity_ entity.IEntity) {
 	defer em.rwMutex.Unlock()
 	//统一管理的对象分配ID
 	em.allEntities.Store(entity_.EntityId(), entity_)
-	_, ok := em.spaceEntities.Load(spaceId)
-	if !ok {
-		em.spaceEntities.Store(spaceId, list.New())
-	}
-	em.forUnits(spaceId, func(entities []entity.IEntity) {
-		entities = append(entities, entity_)
+	em.spaceEntities.LoadOrStore(spaceId, make([]entity.IEntity, 0))
+	em.forUnits(spaceId, func(entities []entity.IEntity) []entity.IEntity {
+		return append(entities, entity_)
 	})
 }
 
-func (em *EntityManager) forUnits(spaceId int, action func(entities []entity.IEntity)) {
+func (em *EntityManager) forUnits(spaceId int, action func(entities []entity.IEntity) []entity.IEntity) {
 	value, ok := em.spaceEntities.Load(spaceId)
 	if ok {
 		entities := value.([]entity.IEntity)
-		action(entities)
+		entities = action(entities)
+		em.spaceEntities.Store(spaceId, entities)
 	}
 }
 
@@ -75,13 +68,14 @@ func (em *EntityManager) RemoveEntity(spaceId int, ie entity.IEntity) {
 	em.rwMutex.Lock()
 	defer em.rwMutex.Unlock()
 	em.allEntities.Delete(ie.EntityId())
-	em.forUnits(spaceId, func(entities []entity.IEntity) {
+	em.forUnits(spaceId, func(entities []entity.IEntity) []entity.IEntity {
 		for i, e := range entities {
 			if e.EntityId() == ie.EntityId() {
 				entities = append(entities[:i], entities[i+1:]...)
 				break
 			}
 		}
+		return entities
 	})
 }
 
@@ -90,16 +84,17 @@ func (em *EntityManager) ChangeSpace(ie entity.IEntity, oldSpaceId, newSpaceId i
 	if oldSpaceId == newSpaceId {
 		return
 	}
-	em.forUnits(oldSpaceId, func(entities []entity.IEntity) {
+	em.forUnits(oldSpaceId, func(entities []entity.IEntity) []entity.IEntity {
 		for i, e := range entities {
 			if e.EntityId() == ie.EntityId() {
 				entities = append(entities[:i], entities[i+1:]...)
 				break
 			}
 		}
+		return entities
 	})
-	em.forUnits(newSpaceId, func(entities []entity.IEntity) {
-		entities = append(entities, ie)
+	em.forUnits(newSpaceId, func(entities []entity.IEntity) []entity.IEntity {
+		return append(entities, ie)
 	})
 }
 
@@ -122,11 +117,13 @@ func (em *EntityManager) GetEntity(entityId int) entity.IEntity {
 // GetEntityList 查找Entity对象
 func GetEntityList[T entity.IEntity](em *EntityManager, spaceId int, match func(T) bool) *list.List {
 	l := list.New()
-	sp, _ := em.spaceEntities.Load(spaceId)
-	for _, e := range sp.([]entity.IEntity) {
-		if v, ok := e.(T); ok {
-			if match(v) {
-				l.PushBack(e)
+	sp, ok := em.spaceEntities.Load(spaceId)
+	if ok {
+		for _, e := range sp.([]entity.IEntity) {
+			if v, ok := e.(T); ok {
+				if match(v) {
+					l.PushBack(e)
+				}
 			}
 		}
 	}

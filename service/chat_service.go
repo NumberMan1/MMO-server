@@ -52,14 +52,14 @@ func (cs *ChatService) chatRequest(msg message_router.Msg) {
 		sp = model.GetSpaceManagerInstance().GetSpace(sd.GetId())
 		switch message.TextValue {
 		case "新手村":
-			chr.TeleportSpace(sp, vector3.Zero3(), vector3.Zero3(), chr)
+			model.TeleportSpace(sp, vector3.Zero3(), vector3.Zero3(), chr)
 		}
 	} else {
 		switch message.TextValue {
 		case "森林":
-			chr.TeleportSpace(model.GetSpaceManagerInstance().GetSpace(2), vector3.NewVector3(354947, 1660, 308498), vector3.Zero3(), chr)
+			model.TeleportSpace(model.GetSpaceManagerInstance().GetSpace(2), vector3.NewVector3(354947, 1660, 308498), vector3.Zero3(), chr)
 		case "山贼":
-			chr.TeleportSpace(model.GetSpaceManagerInstance().GetSpace(2), vector3.NewVector3(263442, 5457, 306462), vector3.Zero3(), chr)
+			model.TeleportSpace(model.GetSpaceManagerInstance().GetSpace(2), vector3.NewVector3(263442, 5457, 306462), vector3.Zero3(), chr)
 		}
 	}
 }

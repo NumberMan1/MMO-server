@@ -131,7 +131,7 @@ func (us *UserService) reviveRequest(msg message_router.Msg) {
 	actor := model.GetUnit(int(message.GetEntityId()))
 	if chr, ok := actor.(*model.Character); ok && chr.IsDeath() && chr.Conn == msg.Sender {
 		sp := GetSpaceServiceInstance().GetSpace(1)
-		chr.TeleportSpace(sp, vector3.Zero3(), vector3.Zero3(), chr)
+		model.TeleportSpace(sp, vector3.Zero3(), vector3.Zero3(), chr)
 		chr.Revive()
 	}
 }
@@ -303,7 +303,6 @@ func (us *UserService) gameEnterRequest(msg message_router.Msg) {
 	character.Conn = conn
 	//角色存入session
 	conn.Get("Session").(*model.Session).Character = character
-	logger.SLCInfo("%v", character.Speed())
 	////通知玩家登录成功
 	//response := &proto.GameEnterResponse{
 	//	Success:   true,

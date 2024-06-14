@@ -1,7 +1,6 @@
 package model
 
 import (
-	"container/list"
 	"github.com/NumberMan1/MMO-server/config/define"
 	"github.com/NumberMan1/MMO-server/protocol/gen/proto"
 	"github.com/NumberMan1/common/logger"
@@ -11,13 +10,13 @@ type SkillManager struct {
 	//归属的角色
 	owner IActor
 	//技能列表
-	Skills *list.List
+	Skills []*Skill
 }
 
 func NewSkillManager(owner IActor) *SkillManager {
 	sm := &SkillManager{
 		owner:  owner,
-		Skills: list.New(),
+		Skills: make([]*Skill, 0),
 	}
 	sm.InitSkills()
 	return sm
@@ -50,22 +49,22 @@ func (sm *SkillManager) loadSkill(ids []int) {
 	for _, id := range ids {
 		sm.owner.Info().Skills = append(sm.owner.Info().Skills, &proto.SkillInfo{Id: int32(id)})
 		sk := NewSkill(sm.owner, id)
-		sm.Skills.PushBack(sk)
+		sm.Skills = append(sm.Skills, sk)
 		logger.SLCInfo("角色[%v]加载技能[%v-%v]", sm.owner.Name(), sk.Def.GetId(), sk.Def.Name)
 	}
 }
 
 func (sm *SkillManager) GetSkill(id int) *Skill {
-	for e := sm.Skills.Front(); e != nil; e = e.Next() {
-		if e.Value.(*Skill).Def.GetId() == id {
-			return e.Value.(*Skill)
+	for _, skill := range sm.Skills {
+		if skill.Def.GetId() == id {
+			return skill
 		}
 	}
 	return nil
 }
 
 func (sm *SkillManager) Update() {
-	for e := sm.Skills.Front(); e != nil; e = e.Next() {
-		e.Value.(*Skill).Update()
+	for _, sk := range sm.Skills {
+		sk.Update()
 	}
 }

@@ -44,9 +44,9 @@ func (m *Missile) OnUpdate(dt float64) {
 	if dist > vector3.GetDistance(a, b) {
 		m.Position = b
 		m.skill.OnHit(m.target)
-		for e := m.FightMgr().Missiles.Front(); e != nil; e = e.Next() {
-			if e.Value.(*Missile) == m {
-				m.FightMgr().Missiles.Remove(e)
+		for i, missile := range m.FightMgr().Missiles {
+			if missile == m {
+				m.FightMgr().Missiles = append(m.FightMgr().Missiles[:i], m.FightMgr().Missiles[i+1:]...)
 				break
 			}
 		}

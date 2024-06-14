@@ -12,7 +12,7 @@ type ServerSysConfig struct {
 		Host        string `yaml:"host"`
 		Port        int    `yaml:"port"`
 		WorkerCount int    `yaml:"worker_count"`
-	} `yaml:"mongodb"`
+	} `yaml:"server"`
 }
 
 var (

@@ -56,7 +56,7 @@ func (g *Gate) teleport() {
 	units := RangeUnit(g.Position(), g.Space().Id, teleportGateRange)
 	for e := units.Front(); e != nil; e = e.Next() {
 		if chr, ok := e.Value.(*Character); ok {
-			chr.TeleportSpace(g.TargetSpace(), g.TargetPosition(), vector3.Zero3(), chr)
+			TeleportSpace(g.TargetSpace(), g.TargetPosition(), vector3.Zero3(), chr)
 		}
 	}
 }

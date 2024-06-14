@@ -4,12 +4,20 @@ import (
 	"context"
 	"fmt"
 	"github.com/NumberMan1/common"
+	"github.com/NumberMan1/common/global/variable"
 	"github.com/NumberMan1/common/logger"
 	mongobrocker "github.com/NumberMan1/common/mongo"
 	"gopkg.in/yaml.v3"
 	"os"
 	"strconv"
+	"time"
 )
+
+type DBModel struct {
+	ID        uint `gorm:"primarykey"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
 
 // mongodb可配置的数据库
 var (
@@ -43,7 +51,6 @@ func Init(configPath string) {
 		panic("加载配置出错")
 	}
 	url := "mongodb://" + config.Mongodb.Host + ":" + strconv.FormatInt(int64(config.Mongodb.Port), 10)
-	fmt.Println(url)
 	//创建mongo客户端
 	MongoDbClient = &mongobrocker.Client{
 		BaseComponent: common.NewBaseComponent(),
@@ -52,5 +59,14 @@ func Init(configPath string) {
 			MinPoolSize: 3,
 			MaxPoolSize: 3000,
 		}),
+	}
+	//设置mysql表
+	err = variable.GDb.AutoMigrate(DbPlayer{})
+	if err != nil {
+		panic(err)
+	}
+	err = variable.GDb.AutoMigrate(DbCharacter{})
+	if err != nil {
+		panic(err)
 	}
 }

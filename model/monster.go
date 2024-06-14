@@ -120,9 +120,9 @@ func (m *Monster) RandomPointWithBirth(r float64) *vector3.Vector3 {
 
 func (m *Monster) Attack(target IActor) {
 	var sk *Skill = nil
-	for e := m.SkillMgr().Skills.Front(); e != nil; e = e.Next() {
-		if e.Value.(*Skill).IsNormal() {
-			sk = e.Value.(*Skill)
+	for _, skill := range m.SkillMgr().Skills {
+		if skill.IsNormal() {
+			sk = skill
 			break
 		}
 	}

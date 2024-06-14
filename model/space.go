@@ -103,7 +103,7 @@ func (s *Space) UpdateEntity(sync *pt.NetEntitySync) {
 func (s *Space) EntityEnter(actor IActor) {
 	logger.SLCInfo("角色进入场景:eid=%v", actor.EntityId())
 	s.actorDict[actor.EntityId()] = actor
-	actor.OnEnterSpace(s, actor)
+	OnEnterSpace(s, actor)
 	resp := &pt.SpaceCharactersEnterResponse{
 		SpaceId:       int32(s.Id), //场景ID
 		CharacterList: make([]*pt.NetActor, 0),

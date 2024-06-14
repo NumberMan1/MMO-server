@@ -1,11 +1,9 @@
 package database
 
-import "gorm.io/gorm"
-
 // DbPlayer 玩家信息
 type DbPlayer struct {
 	//ID       uint   `gorm:"PRIMARY_KEY"`
-	gorm.Model
+	DBModel
 	Username string `gorm:"username"`
 	Password string
 	Coin     int
@@ -14,7 +12,7 @@ type DbPlayer struct {
 // DbCharacter 玩家的角色
 type DbCharacter struct {
 	//ID       uint `gorm:"PRIMARY_KEY"`
-	gorm.Model
+	DBModel
 	JobId    int
 	Name     string
 	Hp       int

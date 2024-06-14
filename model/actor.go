@@ -171,13 +171,14 @@ func (a *Actor) IsDeath() bool {
 	return a.unitState == proto.UnitState_DEAD
 }
 
-func (a *Actor) OnEnterSpace(space *Space, chr IActor) {
-	if a.space != nil && space != nil {
-		mgr.GetEntityManagerInstance().ChangeSpace(a, a.Space().Id, space.Id)
+// OnEnterSpace 演员进入到对应的地图
+func OnEnterSpace(space *Space, actor IActor) {
+	if actor.Space() != nil && space != nil {
+		mgr.GetEntityManagerInstance().ChangeSpace(actor, actor.Space().Id, space.Id)
 	}
-	a.space = space
-	a.info.SpaceId = int32(space.Id)
-	if c, ok := chr.(*Character); ok {
+	actor.SetSpace(space)
+	actor.Info().SpaceId = int32(space.Id)
+	if c, ok := actor.(*Character); ok {
 		c.Data.SpaceId = space.Id
 	}
 }
@@ -192,14 +193,15 @@ func (a *Actor) Revive() {
 	a.SetAndUpdateState(proto.UnitState_FREE)
 }
 
-func (a *Actor) TeleportSpace(space *Space, pos, dir *vector3.Vector3, chr IActor) {
-	if _, ok := chr.(*Character); !ok {
+// TeleportSpace 将演员传送到对应的地图的坐标
+func TeleportSpace(space *Space, pos, dir *vector3.Vector3, actor IActor) {
+	if _, ok := actor.(*Character); !ok {
 		return
 	}
-	chrTmp := chr.(*Character)
-	if space != a.Space() {
+	chrTmp := actor.(*Character)
+	if space != actor.Space() {
 		//1.退出当前场景
-		space.EntityLeave(chrTmp)
+		actor.Space().EntityLeave(chrTmp)
 		//2.设置坐标和方向
 		chrTmp.SetPosition(pos)
 		chrTmp.SetDirection(dir)

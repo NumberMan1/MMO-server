@@ -1,7 +1,6 @@
 package model
 
 import (
-	"container/list"
 	"github.com/NumberMan1/MMO-server/mgr"
 	"github.com/NumberMan1/MMO-server/protocol/gen/proto"
 	"github.com/NumberMan1/common/logger"
@@ -12,7 +11,7 @@ import (
 type FightMgr struct {
 	space *Space
 	//投射物列表
-	Missiles *list.List
+	Missiles []*Missile
 
 	//技能施法队列
 	CastQueue *ns.TSQueue[*proto.CastInfo]
@@ -34,7 +33,7 @@ type FightMgr struct {
 func NewFightMgr(space *Space) *FightMgr {
 	return &FightMgr{
 		space:                  space,
-		Missiles:               list.New(),
+		Missiles:               make([]*Missile, 0),
 		CastQueue:              ns.NewTSQueue[*proto.CastInfo](),
 		SpellQueue:             ns.NewTSQueue[*proto.CastInfo](),
 		DamageQueue:            ns.NewTSQueue[*proto.Damage](),
@@ -51,8 +50,8 @@ func (fm *FightMgr) OnUpdate(delta float64) {
 		logger.SLCInfo("执行施法:%v", cast)
 		fm.RunCast(cast)
 	}
-	for e := fm.Missiles.Front(); e != nil; e = e.Next() {
-		e.Value.(*Missile).OnUpdate(delta)
+	for _, missile := range fm.Missiles {
+		missile.OnUpdate(delta)
 	}
 	fm.broadcastSpell()
 	fm.broadcastDamage()

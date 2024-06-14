@@ -122,7 +122,7 @@ func (s *Skill) OnActive() {
 	//如果是投射物
 	if s.Def.IsMissile {
 		missile := NewMissile(s, s.Owner.Position(), s.target)
-		s.FightMgr().Missiles.PushBack(missile)
+		s.FightMgr().Missiles = append(s.FightMgr().Missiles, missile)
 	} else {
 		//如果不是投射物
 		logger.SLCInfo("Def.HitDelay.Length=%v", len(s.Def.HitDelay))

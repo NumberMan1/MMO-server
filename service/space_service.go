@@ -1,11 +1,11 @@
 package service
 
 import (
+	"fmt"
 	"github.com/NumberMan1/MMO-server/core/vector3"
 	"github.com/NumberMan1/MMO-server/mgr"
 	"github.com/NumberMan1/MMO-server/model"
 	"github.com/NumberMan1/MMO-server/protocol/gen/proto"
-	"github.com/NumberMan1/common/logger"
 	"github.com/NumberMan1/common/ns/singleton"
 	"github.com/NumberMan1/common/summer/network"
 	"github.com/NumberMan1/common/summer/network/message_router"
@@ -58,7 +58,7 @@ func (ss *SpaceService) spaceEntitySyncRequest(msg message_router.Msg) {
 	dt := min(serEntity.PositionTime(), 1.0)
 	//计算限额
 	limit := float64(serEntity.Speed()) * dt * 3
-	logger.SLCInfo("距离%v，阈值%v，间隔%v", distance, limit, dt)
+	fmt.Printf("距离%v，阈值%v，间隔%v\n", distance, limit, dt)
 	if math.IsNaN(distance) || distance > limit {
 		//拉回原位置
 		resp := &proto.SpaceEntitySyncResponse{

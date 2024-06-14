@@ -1,18 +1,17 @@
 package model
 
 import (
-	"container/list"
 	define2 "github.com/NumberMan1/MMO-server/config/define"
 )
 
 // SpawnManager 刷怪管理器
 type SpawnManager struct {
-	Rules *list.List
+	Rules []*Spawner
 	Space *Space
 }
 
 func NewSpawnManager() *SpawnManager {
-	return &SpawnManager{Rules: list.New()}
+	return &SpawnManager{Rules: make([]*Spawner, 0)}
 }
 
 func (sm *SpawnManager) Init(space *Space) {
@@ -25,13 +24,12 @@ func (sm *SpawnManager) Init(space *Space) {
 		}
 	}
 	for _, v := range rules {
-		sm.Rules.PushBack(NewSpawner(v, space))
+		sm.Rules = append(sm.Rules, NewSpawner(v, space))
 	}
 }
 
 func (sm *SpawnManager) Update() {
-	for e := sm.Rules.Front(); e != nil; e = e.Next() {
-		s := e.Value.(*Spawner)
-		s.Update()
+	for _, rule := range sm.Rules {
+		rule.Update()
 	}
 }

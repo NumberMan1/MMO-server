@@ -52,14 +52,14 @@ func initServices() {
 	gate1 := model.NewGate(1, 4001001, vector3.NewVector3(10000, 0, 10000), vector3.Zero3())
 	gate1.SetName("传送门-森林入口")
 	gate1.SetTarget(model.GetSpaceManagerInstance().GetSpace(2), vector3.NewVector3(354947, 1660, 308498))
-	//山贼附近
-	gate2 := model.NewGate(1, 4001001, vector3.NewVector3(15000, 0, 12000), vector3.Zero3())
-	gate2.SetName("传送门-山贼")
-	gate2.SetTarget(model.GetSpaceManagerInstance().GetSpace(2), vector3.NewVector3(263442, 5457, 306462))
 	//传送门2：森林=>新手村
 	gate3 := model.NewGate(2, 4001001, vector3.NewVector3(346318, 1870, 319313), vector3.Zero3())
 	gate3.SetName("传送门-新手村")
 	gate3.SetTarget(model.GetSpaceManagerInstance().GetSpace(1), vector3.NewVector3(0, 0, 0))
+	//山贼附近
+	gate2 := model.NewGate(1, 4001001, vector3.NewVector3(15000, 0, 10000), vector3.Zero3())
+	gate2.SetName("传送门-山贼")
+	gate2.SetTarget(model.GetSpaceManagerInstance().GetSpace(2), vector3.NewVector3(263442, 5457, 306462))
 }
 
 func main() {
