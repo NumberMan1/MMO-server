@@ -51,7 +51,7 @@ func (dm *DataManager) Init() {
 }
 
 func loadFromMongo[T IDefine](ctx context.Context, kv map[int]T, client *mongobrocker.Client, constructor func() T) {
-	cursor, err := client.Find(ctx, "MMO", reflect.TypeOf(kv).String(), bson.D{})
+	cursor, err := client.Find(ctx, "mmo_game", reflect.TypeOf(kv).String(), bson.D{})
 	if err != nil {
 		panic(err)
 	}

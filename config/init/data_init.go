@@ -33,7 +33,7 @@ func save[T define2.IDefine](ctx context.Context, client *mongobrocker.Client, k
 	index := options.Index()
 	index.SetUnique(true)
 	index.SetName("id")
-	_, err := client.CreateIndex(ctx, "MMO", reflect.TypeOf(kv).String(), mongo.IndexModel{
+	_, err := client.CreateIndex(ctx, "mmo_game", reflect.TypeOf(kv).String(), mongo.IndexModel{
 		Keys:    bson.D{{"id", 1}},
 		Options: index,
 	})
@@ -46,7 +46,7 @@ func save[T define2.IDefine](ctx context.Context, client *mongobrocker.Client, k
 		//	panic(err)
 		//}
 
-		_, err = client.InsertOne(ctx, "MMO", reflect.TypeOf(kv).String(), bson.D{{"id", v.GetId()}, {"base_info", v}})
+		_, err = client.InsertOne(ctx, "mmo_game", reflect.TypeOf(kv).String(), bson.D{{"id", v.GetId()}, {"base_info", v}})
 		//err = client.HSet(ctx, reflect.TypeOf(kv).String(), k, marshal).Err()
 		if err != nil {
 			panic(err)
