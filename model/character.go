@@ -3,7 +3,7 @@ package model
 import (
 	"github.com/NumberMan1/MMO-server/core/vector3"
 	"github.com/NumberMan1/MMO-server/database"
-	"github.com/NumberMan1/MMO-server/inventory/item"
+	"github.com/NumberMan1/MMO-server/inventory_system/item"
 	"github.com/NumberMan1/MMO-server/protocol/gen/proto"
 	"github.com/NumberMan1/common/summer/network"
 )
@@ -56,8 +56,8 @@ func (c *Character) UseItem(slotIndex int) {
 	if item1.ItemType() != item.ItemType_Consumable {
 		return
 	}
-	item1.Amount -= 1
-	if item1.Amount <= 0 {
+	item1.SetAmount(item1.Amount() - 1)
+	if item1.Amount() <= 0 {
 		c.Knapsack.SetItem(slotIndex, nil)
 	}
 	//发送消息

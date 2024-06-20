@@ -3,13 +3,14 @@ package model
 import (
 	"github.com/NumberMan1/MMO-server/config/define"
 	"github.com/NumberMan1/MMO-server/core/vector3"
-	"github.com/NumberMan1/MMO-server/inventory/item"
+	"github.com/NumberMan1/MMO-server/inventory_system/item"
 	"github.com/NumberMan1/MMO-server/protocol/gen/proto"
 	"github.com/NumberMan1/common/logger"
 	"github.com/NumberMan1/common/summer/proto_helper"
 	"sync"
 )
 
+// Inventory 库存对象
 type Inventory struct {
 	chr           *Character
 	capacity      int
@@ -28,7 +29,7 @@ func (i *Inventory) InventoryInfo() *proto.InventoryInfo {
 		//重新拼装proto对象
 		i.inventoryInfo.List = make([]*proto.ItemInfo, 0)
 		i.itemMap.Range(func(key, value any) bool {
-			i.inventoryInfo.List = append(i.inventoryInfo.List, value.(*item.Item).ItemInfo())
+			i.inventoryInfo.List = append(i.inventoryInfo.List, value.(item.IItem).ItemInfo())
 			return true
 		})
 	}
@@ -69,13 +70,14 @@ func (i *Inventory) Init(data []byte) {
 		i.setCapacity(int(inv.Capacity))
 		//创建物品
 		for _, itemInfo := range inv.List {
-			i.SetItem(int(itemInfo.Position), item.NewItemByItemId(int(itemInfo.ItemId), int(itemInfo.Amount), int(itemInfo.Position)))
+			it, _ := item.CreateItemByItemId(int(itemInfo.ItemId), int(itemInfo.Amount), int(itemInfo.Position))
+			i.SetItem(int(itemInfo.Position), it)
 		}
 	}
 }
 
 // SetItem 设置插槽的物品，插槽索引从0开始
-func (i *Inventory) SetItem(slotIndex int, item2 *item.Item) bool {
+func (i *Inventory) SetItem(slotIndex int, item2 item.IItem) bool {
 	//如果索引大于容量则停止设置
 	if slotIndex >= i.Capacity() {
 		return false
@@ -87,20 +89,20 @@ func (i *Inventory) SetItem(slotIndex int, item2 *item.Item) bool {
 		value, ok := i.itemMap.Load(slotIndex)
 		if ok {
 			i.itemMap.Delete(slotIndex)
-			value.(*item.Item).Position = -1
+			value.(item.IItem).SetPosition(-1)
 		}
 		return true
 	}
 	//设置插槽物品
 	i.itemMap.Store(slotIndex, item2)
-	item2.Position = slotIndex
+	item2.SetPosition(slotIndex)
 	return true
 }
 
 // TrySlotItem 获取插槽物品
-func (i *Inventory) TrySlotItem(slotIndex int) (*item.Item, bool) {
+func (i *Inventory) TrySlotItem(slotIndex int) (item.IItem, bool) {
 	value, ok := i.itemMap.Load(slotIndex)
-	return value.(*item.Item), ok
+	return value.(item.IItem), ok
 }
 
 // AddItem 物品加入库存
@@ -121,12 +123,12 @@ func (i *Inventory) AddItem(itemId, amount int) bool {
 		sameItem := i.findSameItemAndNotFull(itemId)
 		if sameItem != nil {
 			//本次可以处理的数量
-			current := min(amount, sameItem.Capacity()-sameItem.Amount)
-			sameItem.Amount += current
+			current := min(amount, sameItem.Capacity()-sameItem.Amount())
+			sameItem.SetAmount(sameItem.Amount() + current)
 			amount -= current
 		} else {
 			//查找背包空闲的插槽索引，-1代表背包已满
-			index := i.findEmptyIndex()
+			index := i.FindEmptyIndex()
 			if index > -1 {
 				//本次可处理的数量
 				current := min(amount, def.Capicity)
@@ -156,27 +158,27 @@ func (i *Inventory) Exchange(originSlotIndex, targetSlotIndex int) bool {
 		return false
 	}
 	t1, _ := i.itemMap.Load(originSlotIndex)
-	item1 := t1.(*item.Item)
+	item1 := t1.(item.IItem)
 	logger.SLCInfo("item1 = %v", item1.Name())
 	//查找目标插槽物品，如果为空，直接放置
-	var item2 *item.Item
+	var item2 item.IItem
 	if t2, ok := i.itemMap.Load(targetSlotIndex); !ok {
 		i.SetItem(originSlotIndex, nil)
 		i.SetItem(targetSlotIndex, item1)
 	} else {
 		//如果物品类型相同
-		item2 = t2.(*item.Item)
+		item2 = t2.(item.IItem)
 		if item1.Id() == item2.Id() {
 			//可移动的数量
-			num := min(item2.Capacity()-item2.Amount, item1.Amount)
+			num := min(item2.Capacity()-item2.Amount(), item1.Amount())
 			// 如果原始物品数量小于等于可移动数量，将原始物品全部移动到目标插槽)
-			if item1.Amount <= num {
-				item2.Amount += item1.Amount
+			if item1.Amount() <= num {
+				item2.SetAmount(item2.Amount() + item1.Amount())
 				i.SetItem(originSlotIndex, nil)
 			} else {
 				// 否则，不移动物品只修改数量
-				item1.Amount -= num
-				item2.Amount += num
+				item1.SetAmount(item1.Amount() - num)
+				item2.SetAmount(item2.Amount() + num)
 			}
 		} else {
 			//如果类型不同则交换位置
@@ -196,13 +198,13 @@ func (i *Inventory) RemoveItem(itemId, amount int) int {
 			break
 		}
 		//判断要移除的数量是否大于物品的当前数量
-		currentAmount := min(amount, findSameItem.Amount)
-		findSameItem.Amount -= currentAmount
+		currentAmount := min(amount, findSameItem.Amount())
+		findSameItem.SetAmount(findSameItem.Amount() - currentAmount)
 		removedAmount += currentAmount
 		amount -= currentAmount
 		//清空物品槽
-		if findSameItem.Amount == 0 {
-			i.SetItem(findSameItem.Position, nil)
+		if findSameItem.Amount() == 0 {
+			i.SetItem(findSameItem.Position(), nil)
 		}
 	}
 	return removedAmount
@@ -217,18 +219,18 @@ func (i *Inventory) Discard(slotIndex, amount int) int {
 		return 0
 	}
 	t1, _ := i.itemMap.Load(slotIndex)
-	item1 := t1.(*item.Item)
+	item1 := t1.(item.IItem)
 	//只丢弃一部分
-	if amount < item1.Amount {
-		item1.Amount -= amount
-		newItem := item.NewItemByItemId(item1.Id(), amount, 0)
+	if amount < item1.Amount() {
+		item1.SetAmount(item1.Amount() - amount)
+		newItem, _ := item.CreateItemByItemId(item1.Id(), amount, 0)
 		CreateItemEntity(i.Chr().Space(), newItem, i.Chr().Position(), vector3.Zero3())
 		return amount
 	}
 	//全额丢弃
 	i.SetItem(slotIndex, nil)
 	CreateItemEntity(i.Chr().Space(), item1, i.Chr().Position(), vector3.Zero3())
-	return item1.Amount
+	return item1.Amount()
 }
 
 // calculateMaxRemainingQuantity 计算背包里还能放多少个这样的物品
@@ -245,10 +247,10 @@ func (i *Inventory) calculateMaxRemainingQuantity(itemId int) int {
 	for index := 0; index < i.Capacity(); index++ {
 		//如果插槽有物品
 		if t1, ok := i.itemMap.Load(index); ok {
-			item1 := t1.(*item.Item)
+			item1 := t1.(item.IItem)
 			//如果物品类型相同
 			if item1.Id() == itemId {
-				quantity += item1.Capacity() - item1.Amount
+				quantity += item1.Capacity() - item1.Amount()
 			}
 		} else {
 			quantity += def.Capicity
@@ -259,11 +261,11 @@ func (i *Inventory) calculateMaxRemainingQuantity(itemId int) int {
 }
 
 // findSameItem 查找ID相同的物品
-func (i *Inventory) findSameItem(itemId int) *item.Item {
-	var item1 *item.Item
+func (i *Inventory) findSameItem(itemId int) item.IItem {
+	var item1 item.IItem
 	i.itemMap.Range(func(key, value any) bool {
 		if value != nil {
-			if item2 := value.(*item.Item); item2.Id() == itemId {
+			if item2 := value.(item.IItem); item2.Id() == itemId {
 				item1 = item2
 				return false
 			}
@@ -274,11 +276,11 @@ func (i *Inventory) findSameItem(itemId int) *item.Item {
 }
 
 // findSameItemAndNotFull 查找ID相同且未满的物品
-func (i *Inventory) findSameItemAndNotFull(itemId int) *item.Item {
-	var item1 *item.Item
+func (i *Inventory) findSameItemAndNotFull(itemId int) item.IItem {
+	var item1 item.IItem
 	i.itemMap.Range(func(key, value any) bool {
 		if value != nil {
-			if item2 := value.(*item.Item); item2.Id() == itemId && item2.Amount < item2.Capacity() {
+			if item2 := value.(item.IItem); item2.Id() == itemId && item2.Amount() < item2.Capacity() {
 				item1 = item2
 				return false
 			}
@@ -288,8 +290,8 @@ func (i *Inventory) findSameItemAndNotFull(itemId int) *item.Item {
 	return item1
 }
 
-// findEmptyIndex 查找空的插槽位置
-func (i *Inventory) findEmptyIndex() int {
+// FindEmptyIndex 查找空的插槽位置
+func (i *Inventory) FindEmptyIndex() int {
 	for index := 0; index < i.Capacity(); index++ {
 		if _, ok := i.itemMap.Load(index); !ok {
 			return index

@@ -4,6 +4,7 @@ type ItemDefine struct {
 	ID          int     `json:"ID" bson:"id"`                   //物品ID
 	Name        string  `json:"Name" bson:"name"`               //名称
 	ItemType    string  `json:"ItemType" bson:"item_type"`      //物品类别
+	EquipsType  string  `json:"EquipsType" bson:"equips_type"`  //装备类型
 	Quality     string  `json:"Quality" bson:"quality"`         //品质
 	Description string  `json:"Description" bson:"description"` //介绍
 	Capicity    int     `json:"Capicity" bson:"capicity"`       //堆叠上限

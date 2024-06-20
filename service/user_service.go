@@ -115,7 +115,7 @@ func (us *UserService) pickupItemRequest(msg message_router.Msg) {
 		}
 	})
 	//如果添加失败则结束
-	if !chr.Knapsack.AddItem(itemEntity.Item().Id(), itemEntity.Item().Amount) {
+	if !chr.Knapsack.AddItem(itemEntity.Item().Id(), itemEntity.Item().Amount()) {
 		return
 	}
 	//物品模型移出场景

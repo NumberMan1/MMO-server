@@ -7,8 +7,8 @@ import (
 
 type AttributesAssembly struct {
 	Basic *fight.Attributes //基础属性（初始+成长）
-	equip *fight.Attributes //装备属性
-	buffs *fight.Attributes //Buff属性
+	Equip *fight.Attributes //装备属性
+	Buffs *fight.Attributes //Buff属性
 	Final *fight.Attributes //最终属性
 	owner IActor
 }
@@ -16,8 +16,8 @@ type AttributesAssembly struct {
 func NewAttributesAssembly() *AttributesAssembly {
 	return &AttributesAssembly{
 		Basic: &fight.Attributes{},
-		equip: &fight.Attributes{},
-		buffs: &fight.Attributes{},
+		Equip: &fight.Attributes{},
+		Buffs: &fight.Attributes{},
 		Final: &fight.Attributes{},
 	}
 }
@@ -26,8 +26,8 @@ func (aa *AttributesAssembly) Init(actor IActor) {
 	aa.owner = actor
 	unitDefine := aa.owner.Define()
 
-	aa.equip.Reset()
-	aa.buffs.Reset()
+	aa.Equip.Reset()
+	aa.Buffs.Reset()
 	aa.Final.Reset()
 	//基础属性
 	aa.Basic = &fight.Attributes{
@@ -68,8 +68,8 @@ func (aa *AttributesAssembly) Reload() {
 	aa.Final.Reset()
 	aa.Final.Add(aa.Basic)
 	aa.Final.Add(growth)
-	aa.Final.Add(aa.equip)
-	aa.Final.Add(aa.buffs)
+	aa.Final.Add(aa.Equip)
+	aa.Final.Add(aa.Buffs)
 	//附加属性
 	extra := &fight.Attributes{
 		HPMax: aa.Final.STR * 5,   //力量加生命上限

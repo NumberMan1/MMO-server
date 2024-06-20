@@ -13,19 +13,20 @@ type DbPlayer struct {
 type DbCharacter struct {
 	//ID       uint `gorm:"PRIMARY_KEY"`
 	DBModel
-	JobId    int
-	Name     string
-	Hp       int
-	Mp       int
-	Level    int
-	Exp      int
-	SpaceId  int
-	X        int
-	Y        int
-	Z        int
-	Gold     int64
-	PlayerId int
-	Knapsack []byte
+	JobId      int
+	Name       string
+	Hp         int
+	Mp         int
+	Level      int
+	Exp        int
+	SpaceId    int
+	X          int
+	Y          int
+	Z          int
+	Gold       int64
+	PlayerId   int
+	Knapsack   []byte `gorm:"blob"`
+	EquipsData []byte `gorm:"blob"`
 }
 
 func NewDbCharacter() *DbCharacter {

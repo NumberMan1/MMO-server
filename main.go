@@ -4,7 +4,6 @@ import (
 	"github.com/NumberMan1/MMO-server/bootstrap"
 	"github.com/NumberMan1/MMO-server/config/define"
 	"github.com/NumberMan1/MMO-server/core/vector3"
-	"github.com/NumberMan1/MMO-server/inventory/item"
 	"github.com/NumberMan1/MMO-server/mgr"
 	"github.com/NumberMan1/MMO-server/model"
 	"github.com/NumberMan1/MMO-server/service"
@@ -41,12 +40,11 @@ func initServices() {
 		model.GetSpaceManagerInstance().Update()
 	}, timeunit.Milliseconds, 20, 0)
 
-	model.CreateItemEntity(model.GetSpaceManagerInstance().GetSpace(1), item.NewItemByItemId(1001, 10, 0),
-		vector3.NewVector3(0, 0, 0), vector3.Zero3())
-	model.CreateItemEntity(model.GetSpaceManagerInstance().GetSpace(1), item.NewItemByItemId(1002, 5, 0),
-		vector3.NewVector3(3000, 0, 3000), vector3.Zero3())
-	model.CreateItemEntity(model.GetSpaceManagerInstance().GetSpace(1), item.NewItemByItemId(1003, 1, 0),
-		vector3.NewVector3(6000, 0, 6000), vector3.Zero3())
+	model.CreateItemEntityById(1, 1001, 10, vector3.NewVector3(0, 0, 0), vector3.Zero3())
+	model.CreateItemEntityById(1, 1002, 5, vector3.NewVector3(3000, 0, 3000), vector3.Zero3())
+	model.CreateItemEntityById(1, 1003, 1, vector3.NewVector3(6000, 0, 4000), vector3.Zero3())
+	model.CreateItemEntityById(1, 1006, 1, vector3.NewVector3(6000, 0, 5000), vector3.Zero3())
+	model.CreateItemEntityById(1, 1007, 1, vector3.NewVector3(6000, 0, 6000), vector3.Zero3())
 
 	//传送门1：新手村=>森林
 	gate1 := model.NewGate(1, 4001001, vector3.NewVector3(10000, 0, 10000), vector3.Zero3())

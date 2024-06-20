@@ -100,7 +100,6 @@ func (n *NetService) onClientConnected(conn network.Connection) {
 	logger.SLCInfo("客户端接入")
 	//n.heartBeatPairs[conn] = time.Now()
 	n.heartBeatPairs.Store(conn, time.Now())
-	conn.Set("Session", core2.NewSession())
 }
 
 func (n *NetService) onDisconnected(conn network.Connection) {

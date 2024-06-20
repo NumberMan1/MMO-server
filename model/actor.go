@@ -3,7 +3,6 @@ package model
 import (
 	define2 "github.com/NumberMan1/MMO-server/config/define"
 	"github.com/NumberMan1/MMO-server/core/vector3"
-	"github.com/NumberMan1/MMO-server/inventory/item"
 	"github.com/NumberMan1/MMO-server/mgr"
 	"github.com/NumberMan1/MMO-server/model/entity"
 	"github.com/NumberMan1/MMO-server/protocol/gen/proto"
@@ -240,7 +239,7 @@ func (a *Actor) OnAfterDie(killerID int) {
 	randIndex := ns.RandInt(0, len(arr))
 	// 获取随机索引对应的元素
 	itemId := arr[randIndex]
-	CreateItemEntity(GetSpaceManagerInstance().GetSpace(a.Space().Id), item.NewItemByItemId(itemId, 5, 0), a.Position(), vector3.Zero3())
+	CreateItemEntityById(a.Space().Id, itemId, 5, a.Position(), vector3.Zero3())
 	//如果击杀者是玩家，给与奖励
 	killer := GetUnit(killerID)
 	if killer != nil {
