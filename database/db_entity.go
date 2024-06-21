@@ -1,5 +1,7 @@
 package database
 
+import "github.com/NumberMan1/common/global/variable"
+
 // DbPlayer 玩家信息
 type DbPlayer struct {
 	//ID       uint   `gorm:"PRIMARY_KEY"`
@@ -7,6 +9,10 @@ type DbPlayer struct {
 	Username string `gorm:"username"`
 	Password string
 	Coin     int
+}
+
+func (d *DbPlayer) TableName() string {
+	return variable.Config.Mysql.TablePrefix + "player"
 }
 
 // DbCharacter 玩家的角色
@@ -25,8 +31,12 @@ type DbCharacter struct {
 	Z          int
 	Gold       int64
 	PlayerId   int
-	Knapsack   []byte `gorm:"blob"`
-	EquipsData []byte `gorm:"blob"`
+	Knapsack   []byte `gorm:"type:blob"`
+	EquipsData []byte `gorm:"type:blob"`
+}
+
+func (d *DbCharacter) TableName() string {
+	return variable.Config.Mysql.TablePrefix + "character"
 }
 
 func NewDbCharacter() *DbCharacter {

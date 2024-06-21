@@ -48,8 +48,28 @@ func (us *UserService) Start() {
 	network.GetMessageRouterInstance().Subscribe("proto.ItemUseRequest", message_router.MessageHandler{Op: us.itemUseRequest})
 	//丢弃物品
 	network.GetMessageRouterInstance().Subscribe("proto.ItemDiscardRequest", message_router.MessageHandler{Op: us.itemDiscardRequest})
+	//穿戴与脱下
+	network.GetMessageRouterInstance().Subscribe("proto.ItemAttachRequest", message_router.MessageHandler{Op: us.itemAttachRequest})
+	network.GetMessageRouterInstance().Subscribe("proto.ItemDetachRequest", message_router.MessageHandler{Op: us.itemDetachRequest})
+	//断线重连
+	network.GetMessageRouterInstance().Subscribe("proto.ReconnectRequest", message_router.MessageHandler{Op: us.reconnectRequest})
 }
 
+// 穿戴
+func (us *UserService) itemAttachRequest(msg message_router.Msg) {
+}
+
+// 脱下
+func (us *UserService) itemDetachRequest(msg message_router.Msg) {
+}
+
+// 断线重连
+func (us *UserService) reconnectRequest(msg message_router.Msg) {
+	//sender := msg.Sender.(network.Connection)
+	//req := msg.Message.(*proto.ReconnectRequest)
+}
+
+// 丢弃物品
 func (us *UserService) itemDiscardRequest(msg message_router.Msg) {
 	rsq := msg.Message.(*proto.ItemDiscardRequest)
 	chr, ok := model.GetUnit(int(rsq.EntityId)).(*model.Character)
@@ -60,6 +80,7 @@ func (us *UserService) itemDiscardRequest(msg message_router.Msg) {
 	chr.SendInventory(true, false, false)
 }
 
+// 使用物品
 func (us *UserService) itemUseRequest(msg message_router.Msg) {
 	rsq := msg.Message.(*proto.ItemUseRequest)
 	chr, ok := model.GetUnit(int(rsq.EntityId)).(*model.Character)
@@ -90,6 +111,7 @@ func (us *UserService) inventoryRequest(msg message_router.Msg) {
 	chr.SendInventory(rsq.QueryKnapsack, rsq.QueryWarehouse, rsq.QueryEquipment)
 }
 
+// 玩家拾取物品
 func (us *UserService) pickupItemRequest(msg message_router.Msg) {
 	s1 := msg.Sender.(network.Connection).Get("Session").(*model.Session)
 	if s1 == nil {
@@ -126,10 +148,11 @@ func (us *UserService) pickupItemRequest(msg message_router.Msg) {
 	chr.SendInventory(true, false, false)
 }
 
+// 复活请求
 func (us *UserService) reviveRequest(msg message_router.Msg) {
 	message := msg.Message.(*proto.ReviveRequest)
 	actor := model.GetUnit(int(message.GetEntityId()))
-	if chr, ok := actor.(*model.Character); ok && chr.IsDeath() && chr.Conn == msg.Sender {
+	if chr, ok := actor.(*model.Character); ok && chr.IsDeath() && chr.Session == msg.Sender {
 		sp := GetSpaceServiceInstance().GetSpace(1)
 		model.TeleportSpace(sp, vector3.Zero3(), vector3.Zero3(), chr)
 		chr.Revive()
@@ -276,9 +299,24 @@ func (us *UserService) userLoginRequest(msg message_router.Msg) {
 		return
 	}
 	if result.RowsAffected > 0 {
+		//让旧的Session离线
+		sessionMgr := model.GetSessionManagerInstance()
+		session := sessionMgr.GetPlayerSession(dbPlayer.ID)
+		if session != nil {
+			if session.Conn != nil {
+				session.Conn.Close()
+			}
+			session.Leave()
+		}
+		//登录成功的客户端分配session对象
+		session = sessionMgr.NewSession(dbPlayer)
+		conn.Set("Session", session)
+		session.Conn = conn
+
+		//发给客户端的消息
 		rsp.Success = true
 		rsp.Message = "登录成功"
-		conn.Get("Session").(*model.Session).DbPlayer = dbPlayer //登录成功，在conn里记录用户信息
+		rsp.SessionId = session.Id
 	} else {
 		rsp.Success = false
 		rsp.Message = "用户名或密码错误"
@@ -299,10 +337,9 @@ func (us *UserService) gameEnterRequest(msg message_router.Msg) {
 	logger.SLCInfo("dbRole = %v", dbRole)
 	// 把数据库角色变成游戏角色
 	character := model.GetCharacterManagerInstance().CreateCharacter(dbRole)
-	//角色与conn关联
-	character.Conn = conn
-	//角色存入session
-	conn.Get("Session").(*model.Session).Character = character
+	// 角色与session关联
+	character.Session = conn.Get("Session").(*model.Session)
+	character.Session.Character = character
 	////通知玩家登录成功
 	//response := &proto.GameEnterResponse{
 	//	Success:   true,

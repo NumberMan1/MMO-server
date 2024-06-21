@@ -108,6 +108,6 @@ func (s *Spell) OnSpellFailure(skillId int, reason proto.CastResult) {
 			SkillId:  int32(skillId),
 			Reason:   reason,
 		}
-		chr.Conn.Send(resp)
+		chr.Session.Send(resp)
 	}
 }

@@ -55,7 +55,7 @@ func (s *Space) CharacterJoin(character *Character) {
 	for _, c := range s.actorDict {
 		rsp.List = append(rsp.List, c.Info())
 	}
-	character.Conn.Send(rsp)
+	character.Session.Send(rsp)
 }
 
 // EntityLeave 演员离开场景
@@ -94,7 +94,7 @@ func (s *Space) UpdateEntity(sync *pt.NetEntitySync) {
 			v.SetEntityData(sync.GetEntity())
 		} else {
 			response := &pt.SpaceEntitySyncResponse{EntitySync: sync}
-			v.Conn.Send(response)
+			v.Session.Send(response)
 		}
 	}
 }
@@ -119,7 +119,7 @@ func (s *Space) EntityEnter(actor IActor) {
 // Broadcast 广播Proto消息给场景的全体玩家
 func (s *Space) Broadcast(message proto.Message) {
 	for _, v := range s.characterDict {
-		v.Conn.Send(message)
+		v.Session.Send(message)
 	}
 }
 

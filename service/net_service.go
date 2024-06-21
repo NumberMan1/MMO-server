@@ -63,6 +63,11 @@ func (n *NetService) heartBeatRequest(msg message_router.Msg) {
 	n.heartBeatPairs.Store(msg.Sender.(network.Connection), time.Now())
 	p := &proto.HeartBeatResponse{}
 	msg.Sender.(network.Connection).Send(p)
+	//更新Session的心跳
+	session := msg.Sender.(network.Connection).Get("Session")
+	if session != nil {
+		session.(*core2.Session).HeartTime = time.Now()
+	}
 }
 
 func (n *NetService) timerCallback() {
@@ -106,12 +111,16 @@ func (n *NetService) onDisconnected(conn network.Connection) {
 	//delete(n.heartBeatPairs, conn)
 	n.heartBeatPairs.Delete(conn)
 	logger.SLCInfo("连接断开:%v", conn.Socket().RemoteAddr().String())
-	character := conn.Get("Session").(*core2.Session).Character
-	if character != nil {
-		space := character.Space()
-		if space != nil {
-			space.EntityLeave(character)
-			core2.GetCharacterManagerInstance().RemoveCharacter(character.Id())
-		}
+	session := conn.Get("Session")
+	if session != nil {
+		session.(*core2.Session).Character = nil
 	}
+	//character := conn.Get("Session").(*core2.Session).Character
+	//if character != nil {
+	//	space := character.Space()
+	//	if space != nil {
+	//		space.EntityLeave(character)
+	//		core2.GetCharacterManagerInstance().RemoveCharacter(character.Id())
+	//	}
+	//}
 }

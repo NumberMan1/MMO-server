@@ -1,8 +1,7 @@
-package inventory_system
+package model
 
 import (
 	"github.com/NumberMan1/MMO-server/inventory_system/item"
-	"github.com/NumberMan1/MMO-server/model"
 	proto2 "github.com/NumberMan1/MMO-server/protocol/gen/proto"
 	"github.com/NumberMan1/common/global/variable"
 	"go.uber.org/zap"
@@ -12,13 +11,13 @@ import (
 
 // EquipsManager 装备管理器，每个主角都有
 type EquipsManager struct {
-	Chr *model.Character
+	Chr *Character
 	//装备数据 proto.EquipsType:*item.Equipment
 	dict          sync.Map
 	inventoryInfo *proto2.InventoryInfo
 }
 
-func NewEquipsManager(owner *model.Character) *EquipsManager {
+func NewEquipsManager(owner *Character) *EquipsManager {
 	return &EquipsManager{Chr: owner}
 }
 

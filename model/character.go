@@ -5,18 +5,19 @@ import (
 	"github.com/NumberMan1/MMO-server/database"
 	"github.com/NumberMan1/MMO-server/inventory_system/item"
 	"github.com/NumberMan1/MMO-server/protocol/gen/proto"
-	"github.com/NumberMan1/common/summer/network"
 )
 
 // Character 角色
 type Character struct {
 	*Actor
 	//当前角色的客户端连接
-	Conn network.Connection
+	Session *Session
 	//当前角色对应的数据库对象
 	Data *database.DbCharacter
 	//背包
 	Knapsack *Inventory
+	//装备管理器
+	EquipsManager *EquipsManager
 }
 
 func NewCharacter(dbCharacter *database.DbCharacter) *Character {
@@ -37,8 +38,12 @@ func NewCharacter(dbCharacter *database.DbCharacter) *Character {
 	c.Info().Hp = float32(dbCharacter.Hp)
 	c.Info().Mp = float32(dbCharacter.Mp)
 	c.Data = dbCharacter
+	//创建背包
 	c.Knapsack = NewInventory(c)
 	c.Knapsack.Init(c.Data.Knapsack)
+	//初始化装备
+	c.EquipsManager = NewEquipsManager(c)
+	c.EquipsManager.Init(c.Data.EquipsData)
 	return c
 }
 
@@ -85,5 +90,5 @@ func (c *Character) SendInventory(isKnapsack, isStorage, isEquips bool) {
 	if isEquips {
 
 	}
-	c.Conn.Send(rsp)
+	c.Session.Send(rsp)
 }

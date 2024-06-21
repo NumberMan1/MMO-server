@@ -73,5 +73,5 @@ func (s *Session) Leave() {
 		}
 		GetCharacterManagerInstance().RemoveCharacter(s.Character.Id())
 	}
-
+	GetSessionManagerInstance().Remove(s.Id)
 }
