@@ -41,7 +41,6 @@ func (n *NetService) Start() {
 	//启动网络监听，指定消息包装类型
 	n.tcpServer.Start()
 	//启动消息分发器
-	//network.GetMessageRouterInstance().Start(4)
 	network.GetMessageRouterInstance().Start(config.ServerConfig.Server.WorkerCount)
 	network.GetMessageRouterInstance().Subscribe("proto.HeartBeatRequest", message_router.MessageHandler{Op: n.heartBeatRequest})
 	go n.timerCallback()
@@ -75,14 +74,6 @@ func (n *NetService) timerCallback() {
 		select {
 		case <-n.heartTicker.C:
 			now := time.Now()
-			//for conn, tp := range n.heartBeatPairs {
-			//	cha := now.Sub(tp)
-			//	//关闭超时的客户端连接
-			//	if cha.Seconds() > (10 * time.Second).Seconds() {
-			//		conn.Close()
-			//		delete(n.heartBeatPairs, conn)
-			//	}
-			//}
 			n.heartBeatPairs.Range(func(k, v any) bool {
 				tp := v.(time.Time)
 				conn := k.(network.Connection)
@@ -103,12 +94,10 @@ func (n *NetService) timerCallback() {
 // 当客户端接入
 func (n *NetService) onClientConnected(conn network.Connection) {
 	logger.SLCInfo("客户端接入")
-	//n.heartBeatPairs[conn] = time.Now()
 	n.heartBeatPairs.Store(conn, time.Now())
 }
 
 func (n *NetService) onDisconnected(conn network.Connection) {
-	//delete(n.heartBeatPairs, conn)
 	n.heartBeatPairs.Delete(conn)
 	logger.SLCInfo("连接断开:%v", conn.Socket().RemoteAddr().String())
 	session := conn.Get("Session")

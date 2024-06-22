@@ -56,19 +56,21 @@ func (ss *SpaceService) spaceEntitySyncRequest(msg message_router.Msg) {
 	netEntity.Speed = int32(serEntity.Speed())
 	//计算时间差
 	dt := min(serEntity.PositionTime(), 1.0)
-	//计算限额
+	//计算限额(算法需要进一步优化)
 	limit := float64(serEntity.Speed()) * dt * 3
 	fmt.Printf("距离%v，阈值%v，间隔%v\n", distance, limit, dt)
 	if math.IsNaN(distance) || distance > limit {
 		//拉回原位置
-		resp := &proto.SpaceEntitySyncResponse{
-			EntitySync: &proto.NetEntitySync{
-				Entity: serEntity.EntityData(),
-				Force:  true,
-			},
-		}
-		msg.Sender.(network.Connection).Send(resp)
-		return
+		//方案1:拉回原位置
+		//resp := &proto.SpaceEntitySyncResponse{
+		//	EntitySync: &proto.NetEntitySync{
+		//		Entity: serEntity.EntityData(),
+		//		Force:  true,
+		//	},
+		//}
+		//msg.Sender.(network.Connection).Send(resp)
+		//return
+		//方案2：记录异常[玩家、角色、原位置、新位置、时间差、当前时间]
 	}
 
 	//广播同步信息

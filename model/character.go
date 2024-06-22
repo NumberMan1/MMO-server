@@ -3,7 +3,7 @@ package model
 import (
 	"github.com/NumberMan1/MMO-server/core/vector3"
 	"github.com/NumberMan1/MMO-server/database"
-	"github.com/NumberMan1/MMO-server/inventory_system/item"
+	"github.com/NumberMan1/MMO-server/model/inventory_system/item"
 	"github.com/NumberMan1/MMO-server/protocol/gen/proto"
 )
 

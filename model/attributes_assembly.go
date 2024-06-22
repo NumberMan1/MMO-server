@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/NumberMan1/MMO-server/fight"
+	"github.com/NumberMan1/MMO-server/model/fight"
 	"github.com/NumberMan1/common/logger"
 )
 

@@ -2,7 +2,7 @@ package item
 
 import (
 	"github.com/NumberMan1/MMO-server/config/define"
-	"github.com/NumberMan1/MMO-server/fight"
+	"github.com/NumberMan1/MMO-server/model/fight"
 	"github.com/NumberMan1/MMO-server/protocol/gen/proto"
 )
 

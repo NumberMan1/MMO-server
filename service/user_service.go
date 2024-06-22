@@ -5,12 +5,14 @@ import (
 	"github.com/NumberMan1/MMO-server/database"
 	"github.com/NumberMan1/MMO-server/mgr"
 	"github.com/NumberMan1/MMO-server/model"
+	"github.com/NumberMan1/MMO-server/model/inventory_system/item"
 	"github.com/NumberMan1/MMO-server/protocol/gen/proto"
 	"github.com/NumberMan1/common/global/variable"
 	"github.com/NumberMan1/common/logger"
 	"github.com/NumberMan1/common/ns/singleton"
 	"github.com/NumberMan1/common/summer/network"
 	"github.com/NumberMan1/common/summer/network/message_router"
+	"go.uber.org/zap"
 	"slices"
 	"strings"
 	"unicode/utf8"
@@ -57,16 +59,60 @@ func (us *UserService) Start() {
 
 // 穿戴
 func (us *UserService) itemAttachRequest(msg message_router.Msg) {
+	req := msg.Message.(*proto.ItemAttachRequest)
+	actor := model.GetUnit(int(req.GetEntityId()))
+	chr, ok := actor.(*model.Character)
+	if !ok {
+		return
+	}
+	slotItem, _ := chr.Knapsack.TrySlotItem(int(req.SlotIndex))
+	variable.Log.Info("attach item", zap.String("item", slotItem.Name()))
+	if equip, ok := slotItem.(*item.Equipment); ok {
+		//清除当前背包插槽
+		chr.Knapsack.SetItem(int(req.SlotIndex), nil)
+		//穿戴装备
+		chr.EquipsManager.Attach(equip)
+		//刷新背包
+		chr.SendInventory(true, false, false)
+	}
 }
 
 // 脱下
 func (us *UserService) itemDetachRequest(msg message_router.Msg) {
+	req := msg.Message.(*proto.ItemDetachRequest)
+	actor := model.GetUnit(int(req.GetEntityId()))
+	chr, ok := actor.(*model.Character)
+	if !ok {
+		return
+	}
+	//脱下装备
+	chr.EquipsManager.Detach(req.EquipsType)
+	//刷新背包
+	chr.SendInventory(true, false, false)
 }
 
 // 断线重连
 func (us *UserService) reconnectRequest(msg message_router.Msg) {
-	//sender := msg.Sender.(network.Connection)
-	//req := msg.Message.(*proto.ReconnectRequest)
+	sender := msg.Sender.(network.Connection)
+	req := msg.Message.(*proto.ReconnectRequest)
+	session := model.GetSessionManagerInstance().GetSession(req.SessionId)
+	//未登录状态
+	if session == nil {
+		sender.Send(&proto.ReconnectResponse{Success: false})
+		return
+	}
+	//重连成功
+	session.Conn = sender
+	sender.Set("Session", session)
+	rsp := proto.ReconnectResponse{
+		Success:  true,
+		EntityId: 0,
+	}
+	if session.Character != nil {
+		rsp.EntityId = int32(session.Character.EntityId())
+		variable.Log.Info("断线重连成功", zap.Int("eid", session.Character.CharacterId()))
+	}
+	sender.Send(&rsp)
 }
 
 // 丢弃物品

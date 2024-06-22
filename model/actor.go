@@ -23,6 +23,26 @@ type Actor struct {
 	spell     *Spell
 }
 
+func (a *Actor) SetHp(hp float32) {
+	a.info.Hp = hp
+}
+
+func (a *Actor) SetMp(mp float32) {
+	a.info.Mp = mp
+}
+
+func (a *Actor) SetLevel(level int32) {
+	a.info.Level = level
+}
+
+func (a *Actor) SetExp(exp int64) {
+	a.info.Exp = exp
+}
+
+func (a *Actor) SetGold(gold int64) {
+	a.info.Gold = gold
+}
+
 func (a *Actor) Level() int {
 	return int(a.Info().Level)
 }
@@ -240,11 +260,11 @@ func (a *Actor) OnAfterDie(killerID int) {
 	// 获取随机索引对应的元素
 	itemId := arr[randIndex]
 	CreateItemEntityById(a.Space().Id, itemId, 5, a.Position(), vector3.Zero3())
-	//如果击杀者是玩家，给与奖励
+	//当角色死亡，击杀者获得经验
 	killer := GetUnit(killerID)
 	if killer != nil {
 		if chr, ok := killer.(*Character); ok {
-			chr.SetAndUpdateLevel(chr.Level() + 1)
+			//chr.SetAndUpdateLevel(chr.Level() + 1)
 			chr.SetAndUpdateGolds(int64(chr.Gold() + 50))
 			chr.SetAndUpdateExp(int64(chr.Exp() + 32))
 		}
@@ -346,17 +366,17 @@ func (a *Actor) SetAndUpdateState(unitState proto.UnitState) {
 
 // SetAndUpdateGolds 金币
 func (a *Actor) SetAndUpdateGolds(value int64) {
-	if a.Info().Gold == value {
+	if a.Gold() == int(value) {
 		return
 	}
-	oldValue := a.Info().Gold
-	a.Info().Gold = value
+	oldValue := a.Gold()
+	a.SetGold(value)
 	rsp := &proto.PropertyUpdate{
 		EntityId: int32(a.EntityId()),
 		Property: proto.PropertyUpdate_Golds,
 		OldValue: &proto.PropertyUpdate_PropertyValue{
 			Value: &proto.PropertyUpdate_PropertyValue_LongValue{
-				LongValue: oldValue,
+				LongValue: int64(oldValue),
 			},
 		},
 		NewValue: &proto.PropertyUpdate_PropertyValue{
@@ -370,17 +390,17 @@ func (a *Actor) SetAndUpdateGolds(value int64) {
 
 // SetAndUpdateExp 经验
 func (a *Actor) SetAndUpdateExp(value int64) {
-	if a.Info().Exp == value {
+	if a.Exp() == int(value) {
 		return
 	}
-	oldValue := a.Info().Exp
-	a.Info().Exp = value
+	oldValue := a.Exp()
+	a.SetExp(value)
 	rsp := &proto.PropertyUpdate{
 		EntityId: int32(a.EntityId()),
 		Property: proto.PropertyUpdate_Exp,
 		OldValue: &proto.PropertyUpdate_PropertyValue{
 			Value: &proto.PropertyUpdate_PropertyValue_LongValue{
-				LongValue: oldValue,
+				LongValue: int64(oldValue),
 			},
 		},
 		NewValue: &proto.PropertyUpdate_PropertyValue{
@@ -390,22 +410,36 @@ func (a *Actor) SetAndUpdateExp(value int64) {
 		},
 	}
 	a.Space().FightMgr.PropertyUpdateQueue.Push(rsp)
+	//处理完经验再处理升级
+	a.Upgrade()
+}
+
+func (a *Actor) Upgrade() {
+	for def, ok := define2.GetDataManagerInstance().Levels[a.Level()]; ok; def, ok = define2.GetDataManagerInstance().Levels[a.Level()] {
+		if a.Exp() >= int(def.ExpLimit) {
+			a.SetAndUpdateExp(int64(a.Exp()) - def.ExpLimit)
+			a.SetAndUpdateLevel(a.Level() + 1)
+		} else {
+			//如果经验值不足以升级，退出循环
+			break
+		}
+	}
 }
 
 // SetAndUpdateLevel 等级
 func (a *Actor) SetAndUpdateLevel(value int) {
-	if int(a.Info().Level) == value {
+	if a.Level() == value {
 		return
 	}
-	oldValue := a.Info().Level
-	a.Info().Level = int32(value)
+	oldValue := a.Level()
+	a.SetLevel(int32(value))
 	a.Attr().Reload()
 	rsp := &proto.PropertyUpdate{
 		EntityId: int32(a.EntityId()),
 		Property: proto.PropertyUpdate_Level,
 		OldValue: &proto.PropertyUpdate_PropertyValue{
 			Value: &proto.PropertyUpdate_PropertyValue_IntValue{
-				IntValue: oldValue,
+				IntValue: int32(oldValue),
 			},
 		},
 		NewValue: &proto.PropertyUpdate_PropertyValue{
@@ -415,17 +449,53 @@ func (a *Actor) SetAndUpdateLevel(value int) {
 		},
 	}
 	a.Space().FightMgr.PropertyUpdateQueue.Push(rsp)
+	//刷新属性
+	a.Attr().Reload()
+}
+
+// SyncSpeed 通知客户端：Speed变化
+func (a *Actor) SyncSpeed(value int) {
+	if a.Speed() == int(value) {
+		return
+	}
+	old := a.Speed()
+	a.SetSpeed(value)
+	po := &proto.PropertyUpdate{
+		EntityId: int32(a.EntityId()),
+		Property: proto.PropertyUpdate_Speed,
+		OldValue: &proto.PropertyUpdate_PropertyValue{
+			Value: &proto.PropertyUpdate_PropertyValue_IntValue{
+				IntValue: int32(old),
+			},
+		},
+		NewValue: &proto.PropertyUpdate_PropertyValue{
+			Value: &proto.PropertyUpdate_PropertyValue_IntValue{
+				IntValue: int32(value),
+			},
+		},
+	}
+	if sp := a.Space(); sp != nil {
+		if fightMgr := sp.FightMgr; fightMgr != nil {
+			if propertyUpdateQueue := fightMgr.PropertyUpdateQueue; propertyUpdateQueue != nil {
+				propertyUpdateQueue.Push(po)
+			}
+		}
+	}
 }
 
 // SyncHpMax 通知客户端：HPMax变化
 func (a *Actor) SyncHpMax(value float32) {
+	if core.Equal(float64(a.Info().GetHpmax()), float64(value)) {
+		return
+	}
+	old := a.Info().GetHpmax()
 	a.Info().Hpmax = value
 	po := &proto.PropertyUpdate{
 		EntityId: int32(a.EntityId()),
 		Property: proto.PropertyUpdate_HPMax,
 		OldValue: &proto.PropertyUpdate_PropertyValue{
 			Value: &proto.PropertyUpdate_PropertyValue_FloatValue{
-				FloatValue: 0,
+				FloatValue: old,
 			},
 		},
 		NewValue: &proto.PropertyUpdate_PropertyValue{
@@ -434,22 +504,28 @@ func (a *Actor) SyncHpMax(value float32) {
 			},
 		},
 	}
-	if a.Space() != nil {
-		if a.Space().FightMgr != nil {
-			a.Space().FightMgr.PropertyUpdateQueue.Push(po)
+	if sp := a.Space(); sp != nil {
+		if fightMgr := sp.FightMgr; fightMgr != nil {
+			if propertyUpdateQueue := fightMgr.PropertyUpdateQueue; propertyUpdateQueue != nil {
+				propertyUpdateQueue.Push(po)
+			}
 		}
 	}
 }
 
 // SyncMpMax 通知客户端：MPMax变化
 func (a *Actor) SyncMpMax(value float32) {
+	if core.Equal(float64(a.Info().GetMpmax()), float64(value)) {
+		return
+	}
+	old := a.Info().GetMpmax()
 	a.Info().Mpmax = value
 	po := &proto.PropertyUpdate{
 		EntityId: int32(a.EntityId()),
 		Property: proto.PropertyUpdate_MPMax,
 		OldValue: &proto.PropertyUpdate_PropertyValue{
 			Value: &proto.PropertyUpdate_PropertyValue_FloatValue{
-				FloatValue: 0,
+				FloatValue: old,
 			},
 		},
 		NewValue: &proto.PropertyUpdate_PropertyValue{
@@ -458,9 +534,11 @@ func (a *Actor) SyncMpMax(value float32) {
 			},
 		},
 	}
-	if a.Space() != nil {
-		if a.Space().FightMgr != nil {
-			a.Space().FightMgr.PropertyUpdateQueue.Push(po)
+	if sp := a.Space(); sp != nil {
+		if fightMgr := sp.FightMgr; fightMgr != nil {
+			if propertyUpdateQueue := fightMgr.PropertyUpdateQueue; propertyUpdateQueue != nil {
+				propertyUpdateQueue.Push(po)
+			}
 		}
 	}
 }

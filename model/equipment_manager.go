@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/NumberMan1/MMO-server/inventory_system/item"
+	"github.com/NumberMan1/MMO-server/model/inventory_system/item"
 	proto2 "github.com/NumberMan1/MMO-server/protocol/gen/proto"
 	"github.com/NumberMan1/common/global/variable"
 	"go.uber.org/zap"
