@@ -1,23 +1,22 @@
 #!/bin/bash
 
-DB_NAME="mmo_game"
-
-# MongoDB 部分
-echo "Creating MongoDB database '$DB_NAME'..."
-sudo docker exec -i mongo mongo <<EOF
-use $DB_NAME
-db.createCollection("$DB_NAME")
-EOF
-echo "MongoDB database '$DB_NAME' created successfully."
-
-# MySQL 部分
+# 定义变量
+MONGO_CONTAINER="mongo"
+MYSQL_CONTAINER="mysql"
+MONGO_PORT=27017
+MONGO_USER="root"
+MONGO_PASSWORD="root"
+MYSQL_PORT=3306
 MYSQL_USER="root"
 MYSQL_PASSWORD="root"
-MYSQL_HOST="127.0.0.1"
-MYSQL_PORT="3306"
+DB_NAME="mmo_game"
 
-echo "Creating MySQL database '$DB_NAME'..."
-sudo docker exec -i mysql mysql -u$MYSQL_USER -p$MYSQL_PASSWORD -h$MYSQL_HOST -P$MYSQL_PORT <<EOF
-CREATE DATABASE $DB_NAME;
-EOF
-echo "MySQL database '$DB_NAME' created successfully."
+# 创建 MongoDB 架构
+echo "Creating $DB_NAME database in MongoDB..."
+docker run --name=mongo --env=MONGO_INITDB_ROOT_USERNAME=$MONGO_USER --env=MONGO_INITDB_ROOT_PASSWORD=$MONGO_PASSWORD --env=MONGO_INITDB_DATABASE=$DB_NAME -p 27017:27017 -d mongo:latest
+
+# 创建 MySQL 架构
+echo "Creating $DB_NAME database in MySQL..."
+docker run --name=mysql --env=MYSQL_ROOT_PASSWORD=$MYSQL_PASSWORD --env=MYSQL_DATABASE=$DB_NAME -p 3306:3306 -p 30060:33060 -d mysql:latest
+
+echo "Databases created successfully."

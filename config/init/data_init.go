@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/NumberMan1/MMO-server/bootstrap"
 	define2 "github.com/NumberMan1/MMO-server/config/define"
-	"github.com/NumberMan1/common"
+	"github.com/NumberMan1/MMO-server/database"
 	"github.com/NumberMan1/common/logger"
 	mongobrocker "github.com/NumberMan1/common/mongo"
 	"go.mongodb.org/mongo-driver/bson"
@@ -33,7 +33,7 @@ func save[T define2.IDefine](ctx context.Context, client *mongobrocker.Client, k
 	index := options.Index()
 	index.SetUnique(true)
 	index.SetName("id")
-	_, err := client.CreateIndex(ctx, "mmo_game", reflect.TypeOf(kv).String(), mongo.IndexModel{
+	_, err := client.CreateIndex(ctx, database.DatabaseName, reflect.TypeOf(kv).String(), mongo.IndexModel{
 		Keys:    bson.D{{"id", 1}},
 		Options: index,
 	})
@@ -46,7 +46,7 @@ func save[T define2.IDefine](ctx context.Context, client *mongobrocker.Client, k
 		//	panic(err)
 		//}
 
-		_, err = client.InsertOne(ctx, "mmo_game", reflect.TypeOf(kv).String(), bson.D{{"id", v.GetId()}, {"base_info", v}})
+		_, err = client.InsertOne(ctx, database.DatabaseName, reflect.TypeOf(kv).String(), bson.D{{"id", v.GetId()}, {"base_info", v}})
 		//err = client.HSet(ctx, reflect.TypeOf(kv).String(), k, marshal).Err()
 		if err != nil {
 			panic(err)
@@ -68,14 +68,7 @@ func main() {
 	items := load[*define2.ItemDefine](filepath.Dir(executable) + "/out/ItemDefine.json")
 	levels := load[*define2.LevelDefine](filepath.Dir(executable) + "/out/LevelDefine.json")
 	ctx := context.Background()
-	client := &mongobrocker.Client{
-		BaseComponent: common.NewBaseComponent(),
-		RealCli: mongobrocker.NewClient(ctx, &mongobrocker.Config{
-			URI:         "mongodb://localhost:27017",
-			MinPoolSize: 3,
-			MaxPoolSize: 3000,
-		}),
-	}
+	client := database.MongoDbClient
 	defer client.RealCli.Disconnect(ctx)
 	if len(os.Args) > 1 && os.Args[1] == "init" { //提供init参数
 		//将技能信息存入mongo

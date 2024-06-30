@@ -22,12 +22,16 @@ type DBModel struct {
 // mongodb可配置的数据库
 var (
 	MongoDbClient *mongobrocker.Client
+	DatabaseName  string
 )
 
 type sysConfig struct {
 	Mongodb struct {
 		Host        string `yaml:"host"`
 		Port        int    `yaml:"port"`
+		User        string `yaml:"user"`
+		Password    string `yaml:"password"`
+		Database    string `yaml:"database"`
 		MinPoolSize int    `yaml:"min_pool_size"`
 		MaxPoolSize int    `yaml:"max_pool_size"`
 	} `yaml:"mongodb"`
@@ -50,7 +54,9 @@ func Init(configPath string) {
 		fmt.Println("Error:", err)
 		panic("加载配置出错")
 	}
-	url := "mongodb://" + config.Mongodb.Host + ":" + strconv.FormatInt(int64(config.Mongodb.Port), 10)
+	DatabaseName = config.Mongodb.Database
+	url := "mongodb://" + config.Mongodb.User + ":" + config.Mongodb.Password + "@" +
+		config.Mongodb.Host + ":" + strconv.FormatInt(int64(config.Mongodb.Port), 10)
 	//创建mongo客户端
 	MongoDbClient = &mongobrocker.Client{
 		BaseComponent: common.NewBaseComponent(),
