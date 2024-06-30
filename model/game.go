@@ -7,6 +7,20 @@ import (
 	"math"
 )
 
+// ActorIsNil 判断演员接口变量是否为nil
+func ActorIsNil(actor IActor) bool {
+	if actor == nil {
+		return true
+	}
+	if ac, ok := actor.(*Character); ok && ac == nil {
+		return true
+	}
+	if am, ok := actor.(*Monster); ok && am == nil {
+		return true
+	}
+	return false
+}
+
 func GetUnit(entityId int) IActor {
 	return mgr.GetEntityManagerInstance().GetEntity(entityId).(IActor)
 }

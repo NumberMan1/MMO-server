@@ -198,7 +198,7 @@ func (us *UserService) pickupItemRequest(msg message_router.Msg) {
 func (us *UserService) reviveRequest(msg message_router.Msg) {
 	message := msg.Message.(*proto.ReviveRequest)
 	actor := model.GetUnit(int(message.GetEntityId()))
-	if chr, ok := actor.(*model.Character); ok && chr.IsDeath() && chr.Session == msg.Sender {
+	if chr, ok := actor.(*model.Character); ok && chr.IsDeath() && chr.Session.Conn == msg.Sender {
 		sp := GetSpaceServiceInstance().GetSpace(1)
 		model.TeleportSpace(sp, vector3.Zero3(), vector3.Zero3(), chr)
 		chr.Revive()

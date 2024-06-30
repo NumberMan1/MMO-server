@@ -7,6 +7,7 @@ import (
 	"github.com/NumberMan1/MMO-server/protocol/gen/proto"
 	"github.com/NumberMan1/common/summer/timeunit"
 	"math/rand"
+	"sync"
 )
 
 type Param struct {
@@ -17,7 +18,7 @@ type Param struct {
 	WalkRange int
 	//追击范围
 	ChaseRange int
-	//Rand       *rand.Rand
+	mux        sync.Mutex
 }
 
 func NewParam() *Param {
@@ -26,7 +27,7 @@ func NewParam() *Param {
 		ViewRange:  8000,
 		WalkRange:  8000,
 		ChaseRange: 12000,
-		//Rand:       rand.New(rand.NewSource(time.Now().Unix())),
+		mux:        sync.Mutex{},
 	}
 }
 
@@ -89,7 +90,7 @@ func NewChaseState() *ChaseState {
 
 func (cs *ChaseState) OnUpdate() {
 	mon := cs.P().Owner
-	if mon.Target == nil || mon.Target.IsDeath() || !mgr.GetEntityManagerInstance().Exist(mon.Target.Id()) {
+	if ActorIsNil(mon.Target) || mon.Target.IsDeath() || !mgr.GetEntityManagerInstance().Exist(mon.Target.EntityId()) {
 		mon.Target = nil
 		cs.Fsm().ChangeState("walk")
 		return

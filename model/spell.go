@@ -43,7 +43,7 @@ func (s *Spell) SpellNoTarget(skillId int) {
 	//检查技能
 	sk := s.Owner().SkillMgr().GetSkill(skillId)
 	if sk == nil {
-		logger.SLCInfo("Spell::SpellNoTarget():Owner[%v]:Skill=%v not found", s.Owner().EntityId(), skillId)
+		logger.SLCInfo("Spell::SpellNoTarget():owner[%v]:Skill=%v not found", s.Owner().EntityId(), skillId)
 		return
 	}
 	//执行技能
@@ -68,13 +68,13 @@ func (s *Spell) SpellTarget(skillId int, targetId int) {
 	//检查技能
 	sk := s.Owner().SkillMgr().GetSkill(skillId)
 	if sk == nil {
-		logger.SLCInfo("Spell::SpellTarget():Owner[%v]:Skill=%v not found", s.Owner().EntityId(), skillId)
+		logger.SLCInfo("Spell::SpellTarget():owner[%v]:Skill=%v not found", s.Owner().EntityId(), skillId)
 		return
 	}
 	//检查目标
 	target := GetUnit(targetId)
-	if target == nil {
-		logger.SLCInfo("Spell::SpellTarget():Owner[%v]:Target=%v not found", s.Owner().EntityId(), targetId)
+	if ActorIsNil(target) {
+		logger.SLCInfo("Spell::SpellTarget():owner[%v]:Target=%v not found", s.Owner().EntityId(), targetId)
 		return
 	}
 	//执行技能

@@ -94,7 +94,7 @@ func (fm *FightMgr) broadcastSpell() {
 
 func (fm *FightMgr) RunCast(info *proto.CastInfo) {
 	caster := mgr.GetEntityManagerInstance().GetEntity(int(info.CasterId)).(IActor)
-	if caster == nil {
+	if ActorIsNil(caster) {
 		logger.SLCInfo("RunCast: Caster is null %v", info.CasterId)
 		return
 	}

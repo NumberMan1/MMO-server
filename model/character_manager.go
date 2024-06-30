@@ -74,12 +74,14 @@ func (cm *CharacterManager) save() {
 		chr.Data.JobId = int(chr.Info().Tid)
 		chr.Data.Hp = int(chr.Info().Hp)
 		chr.Data.Mp = int(chr.Info().Mp)
-		chr.Data.Level = int(chr.Info().Level)
 		chr.Data.Exp = int(chr.Info().Exp)
-		chr.Data.SpaceId = int(chr.Info().SpaceId)
+		chr.Data.Level = int(chr.Info().Level)
 		chr.Data.Gold = chr.Info().Gold
+		chr.Data.SpaceId = int(chr.Info().SpaceId)
 		bs, _ := proto.Marshal(chr.Knapsack.InventoryInfo())
 		chr.Data.Knapsack = bs
+		bs, _ = proto.Marshal(chr.EquipsManager.InventoryInfo())
+		chr.Data.EquipsData = bs
 		variable.GDb.Save(chr.Data)
 		return true
 	})

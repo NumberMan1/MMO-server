@@ -6,6 +6,23 @@ import (
 	"github.com/NumberMan1/MMO-server/protocol/gen/proto"
 )
 
+// ItemIsNil 判断物品接口变量是否为nil
+func ItemIsNil(item IItem) bool {
+	if item == nil {
+		return true
+	}
+	if it, ok := item.(*Consumable); ok && it == nil {
+		return true
+	}
+	if it, ok := item.(*Material); ok && it == nil {
+		return true
+	}
+	if it, ok := item.(*Equipment); ok && it == nil {
+		return true
+	}
+	return false
+}
+
 func NewItem(def *define2.ItemDefine, amount, position int) *Item {
 	i := &Item{def: def, amount: amount, position: position}
 	i.init(def.ID, def.Name, ItemType_Material, Quality_Common, def.Description, def.Capicity, def.BuyPrice, def.SellPrice, def.Icon)

@@ -58,7 +58,7 @@ func (i *Inventory) Capacity() int {
 
 func (i *Inventory) Init(data []byte) {
 	//默认背包
-	if data == nil {
+	if data == nil || len(data) == 0 {
 		i.setCapacity(10)
 	} else { //数据还原
 		msg, err := proto_helper.Parse([]byte("proto.InventoryInfo"), data)
@@ -85,11 +85,12 @@ func (i *Inventory) SetItem(slotIndex int, item2 item.IItem) bool {
 	//标记数据发生变化
 	i.hasChanged = true
 	//清空当前插槽
-	if item2 == nil {
+	if item.ItemIsNil(item2) {
 		value, ok := i.itemMap.Load(slotIndex)
 		if ok {
+			tempIt := value.(item.IItem)
 			i.itemMap.Delete(slotIndex)
-			value.(item.IItem).SetPosition(-1)
+			tempIt.SetPosition(-1)
 		}
 		return true
 	}
@@ -121,7 +122,7 @@ func (i *Inventory) AddItem(itemId, amount int) bool {
 	for amount > 0 {
 		//查找id相同且未满的物品
 		sameItem := i.findSameItemAndNotFull(itemId)
-		if sameItem != nil {
+		if !item.ItemIsNil(sameItem) {
 			//本次可以处理的数量
 			current := min(amount, sameItem.Capacity()-sameItem.Amount())
 			sameItem.SetAmount(sameItem.Amount() + current)
@@ -182,8 +183,8 @@ func (i *Inventory) Exchange(originSlotIndex, targetSlotIndex int) bool {
 			}
 		} else {
 			//如果类型不同则交换位置
-			i.SetItem(originSlotIndex, item2)
 			i.SetItem(targetSlotIndex, item1)
+			i.SetItem(originSlotIndex, item2)
 		}
 	}
 	return true
@@ -194,7 +195,7 @@ func (i *Inventory) RemoveItem(itemId, amount int) int {
 	removedAmount := 0
 	for amount > 0 {
 		findSameItem := i.findSameItem(itemId)
-		if findSameItem == nil {
+		if item.ItemIsNil(findSameItem) {
 			break
 		}
 		//判断要移除的数量是否大于物品的当前数量

@@ -60,7 +60,7 @@ func (m *Rpc) validate(all bool) error {
 
 	// no validation rules for Name
 
-	// no validation rules for Target
+	// no validation rules for target
 
 	// no validation rules for Args
 

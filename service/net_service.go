@@ -22,6 +22,7 @@ type NetService struct {
 	cancel         chan struct{}
 }
 
+// NewNetService 创建 NetService 网络服务对象
 func NewNetService() *NetService {
 	//server, _ := network.NewTcpServer("127.0.0.1:32510")
 	server, _ := network.NewTcpServer(config.ServerConfig.Server.Host + ":" + strconv.FormatInt(int64(config.ServerConfig.Server.Port), 10))

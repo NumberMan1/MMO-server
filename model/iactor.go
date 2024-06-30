@@ -12,6 +12,11 @@ type IActor interface {
 	// IEntity interface 的继承
 	entity.IEntity
 
+	// BuffManager 获取该角色的buff管理器
+	BuffManager() *BuffManager
+	// SetBuffManager 设置该角色的buff管理器
+	SetBuffManager(buffManager *BuffManager)
+
 	// SetHp 设置角色当前血量
 	SetHp(hp float32)
 

@@ -114,18 +114,18 @@ func (s *Skill) Update() {
 }
 
 func (s *Skill) onIntonate() {
-	logger.SLCInfo("技能蓄力：Owner[%v],Skill[%v]", s.Owner.EntityId(), s.Def.Name)
+	logger.SLCInfo("技能蓄力：owner[%v],Skill[%v]", s.Owner.EntityId(), s.Def.Name)
 }
 
 func (s *Skill) OnActive() {
-	logger.SLCInfo("技能激活：Owner[%v],Skill[%v]", s.Owner.EntityId(), s.Def.Name)
+	logger.SLCInfo("技能激活：owner[%v],Skill[%v]", s.Owner.EntityId(), s.Def.Name)
 	//如果是投射物
 	if s.Def.IsMissile {
 		missile := NewMissile(s, s.Owner.Position(), s.target)
 		s.FightMgr().Missiles = append(s.FightMgr().Missiles, missile)
 	} else {
 		//如果不是投射物
-		logger.SLCInfo("Def.HitDelay.Length=%v", len(s.Def.HitDelay))
+		logger.SLCInfo("def.HitDelay.Length=%v", len(s.Def.HitDelay))
 		for _, v := range s.Def.HitDelay {
 			summer.GetScheduleInstance().AddTask(s.hitTrigger, timeunit.Milliseconds, int(v*1000), 1)
 		}
@@ -134,13 +134,13 @@ func (s *Skill) OnActive() {
 
 // 触发延迟伤害
 func (s *Skill) hitTrigger() {
-	logger.SLCInfo("hitTrigger：Owner[%v],Skill[%v]", s.Owner.EntityId(), s.Def.Name)
+	logger.SLCInfo("hitTrigger：owner[%v],Skill[%v]", s.Owner.EntityId(), s.Def.Name)
 	s.OnHit(s.target)
 }
 
 // OnHit 技能打到目标
 func (s *Skill) OnHit(sco fight.ISCObject) {
-	logger.SLCInfo("OnHit：Owner[%v],Skill[%v]，SCO[%v]", s.Owner.EntityId(), s.Def.Name, sco)
+	logger.SLCInfo("OnHit：owner[%v],Skill[%v]，SCO[%v]", s.Owner.EntityId(), s.Def.Name, sco)
 	//单体伤害
 	if s.Def.Area == 0 {
 		if ob, ok := sco.(*fight.SCEntity); ok {
@@ -207,7 +207,7 @@ func (s *Skill) takeDamage(target IActor) {
 }
 
 func (s *Skill) OnFinish() {
-	logger.SLCInfo("技能结束：Owner[%v],Skill[%v]", s.Owner.EntityId(), s.Def.Name)
+	logger.SLCInfo("技能结束：owner[%v],Skill[%v]", s.Owner.EntityId(), s.Def.Name)
 }
 
 // CanUse 检查技能是否可用

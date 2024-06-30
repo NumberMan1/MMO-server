@@ -7,20 +7,29 @@ import (
 	"github.com/NumberMan1/MMO-server/model/entity"
 	"github.com/NumberMan1/MMO-server/protocol/gen/proto"
 	"github.com/NumberMan1/common/logger"
-	"github.com/NumberMan1/common/ns"
 	"github.com/NumberMan1/common/summer/core"
+	"math/rand"
 )
 
 type Actor struct {
 	*entity.Entity
-	space     *Space
-	info      *proto.NetActor
-	define    *define2.UnitDefine
-	state     proto.EntityState
-	attr      *AttributesAssembly
-	unitState proto.UnitState
-	skillMgr  *SkillManager
-	spell     *Spell
+	space       *Space
+	info        *proto.NetActor
+	define      *define2.UnitDefine
+	state       proto.EntityState
+	attr        *AttributesAssembly
+	unitState   proto.UnitState
+	skillMgr    *SkillManager
+	spell       *Spell
+	buffManager *BuffManager
+}
+
+func (a *Actor) BuffManager() *BuffManager {
+	return a.buffManager
+}
+
+func (a *Actor) SetBuffManager(buffManager *BuffManager) {
+	a.buffManager = buffManager
 }
 
 func (a *Actor) SetHp(hp float32) {
@@ -116,9 +125,10 @@ func NewActor(t proto.EntityType, tid, level int, position, direction *vector3.V
 		a.SetSkillMgr(NewSkillManager(a))
 		a.Attr().Init(a)
 		a.SetSpell(NewSpell(a))
+		a.SetBuffManager(NewBuffManager(a))
+		a.Info().Hpmax = a.Attr().Final.HPMax
+		a.Info().Mpmax = a.Attr().Final.MPMax
 	}
-
-	//a.SetSpeed(a.define.Speed)
 	return a
 }
 
@@ -187,7 +197,7 @@ func (a *Actor) SetAttr(attr *AttributesAssembly) {
 }
 
 func (a *Actor) IsDeath() bool {
-	return a.unitState == proto.UnitState_DEAD
+	return a.UnitState() == proto.UnitState_DEAD
 }
 
 // OnEnterSpace 演员进入到对应的地图
@@ -256,7 +266,7 @@ func (a *Actor) OnAfterDie(killerID int) {
 	// 物品池
 	arr := []int{1001, 1002}
 	// 生成一个随机索引
-	randIndex := ns.RandInt(0, len(arr))
+	randIndex := rand.Intn(len(arr))
 	// 获取随机索引对应的元素
 	itemId := arr[randIndex]
 	CreateItemEntityById(a.Space().Id, itemId, 5, a.Position(), vector3.Zero3())
@@ -265,8 +275,8 @@ func (a *Actor) OnAfterDie(killerID int) {
 	if killer != nil {
 		if chr, ok := killer.(*Character); ok {
 			//chr.SetAndUpdateLevel(chr.Level() + 1)
-			chr.SetAndUpdateGolds(int64(chr.Gold() + 50))
-			chr.SetAndUpdateExp(int64(chr.Exp() + 32))
+			chr.SetAndUpdateExp(int64(chr.Exp() + a.Define().ExpReward))
+			chr.SetAndUpdateGolds(int64(chr.Gold() + a.Define().GoldReward))
 		}
 	}
 }
