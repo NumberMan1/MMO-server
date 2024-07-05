@@ -25,14 +25,14 @@ var (
 
 type sysConfig struct {
 	Mongodb struct {
-		Host        string `yaml:"host"mapstructure:"host"`
+		Host        string `yaml:"host" mapstructure:"host"`
 		Port        int    `yaml:"port" mapstructure:"port"`
 		User        string `yaml:"user" mapstructure:"user"`
 		Password    string `yaml:"password" mapstructure:"password"`
 		Database    string `yaml:"database" mapstructure:"database"`
 		MinPoolSize int    `yaml:"min_pool_size" mapstructure:"min_pool_size"`
-		MaxPoolSize int    `yaml:"max_pool_size"mapstructure:"max_pool_size"`
-	} `yaml:"mongodb"mapstructure:"mongodb"`
+		MaxPoolSize int    `yaml:"max_pool_size" mapstructure:"max_pool_size"`
+	} `yaml:"mongodb" mapstructure:"mongodb"`
 }
 
 func Init() {
