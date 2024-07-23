@@ -103,7 +103,7 @@ func (n *NetService) onDisconnected(conn network.Connection) {
 	logger.SLCInfo("连接断开:%v", conn.Socket().RemoteAddr().String())
 	session := conn.Get("Session")
 	if session != nil {
-		session.(*core2.Session).Character = nil
+		session.(*core2.Session).Conn = nil
 	}
 	//character := conn.Get("Session").(*core2.Session).Character
 	//if character != nil {
